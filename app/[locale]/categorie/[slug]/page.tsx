@@ -150,9 +150,20 @@ export default function CategoryPage() {
                   <div>
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex gap-3 items-center">
-                        <div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center font-bold text-xl text-purple-400 border border-slate-700">
-                          {tool.name.charAt(0)}
-                        </div>
+<div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center border border-slate-700 overflow-hidden shrink-0">
+  <img 
+    src={`https://logo.clearbit.com/${new URL(tool.url).hostname}`} 
+    alt={tool.name}
+    className="w-full h-full object-cover"
+    onError={(e) => {
+      // Si Clearbit ne trouve pas le logo, on affiche la première lettre
+      e.currentTarget.style.display = 'none';
+      e.currentTarget.parentElement!.innerHTML = `<span class="font-bold text-xl text-purple-400">${tool.name.charAt(0)}</span>`;
+    }}
+  />
+</div>
+						
+						
                         <div>
                           <h3 className="font-bold text-lg text-white">{tool.name}</h3>
                           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${

@@ -182,7 +182,6 @@ export default function AnnuaireDesktop() {
       <main className="max-w-[1600px] mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20">
         
         {/* SIDEBAR FILTRES */}
-        {/* SIDEBAR FILTRES */}
         <aside className="hidden lg:block lg:col-span-3 space-y-6">
           <div className="bg-[#13141b] border border-slate-800 rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-4 text-cyan-400">
@@ -293,6 +292,7 @@ export default function AnnuaireDesktop() {
 
         </div>
 
+
         {/* DERNIERS AJOUTS */}
         <div className="col-span-1 lg:col-span-12 mt-10">
           <div className="flex items-center gap-3 mb-6">
@@ -312,18 +312,39 @@ export default function AnnuaireDesktop() {
               {recentTools.map(tool => (
                 <div key={tool.id} className="bg-[#13141b] border border-slate-700/50 rounded-xl p-5 hover:border-purple-500/50 transition-colors flex flex-col justify-between">
                   <div>
-                    <div className="flex justify-between items-start mb-2 gap-2">
-                      <h3 className="font-bold text-lg text-white leading-tight">{tool.name}</h3>
+                    {/* EN-TÊTE DE LA CARTE : Logo + Titre + Prix */}
+                    <div className="flex justify-between items-start mb-3 gap-3">
+                      
+                      {/* Logo + Titre */}
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center border border-slate-700 overflow-hidden shrink-0">
+                          <img 
+                            src={`https://logo.clearbit.com/${new URL(tool.url).hostname}`} 
+                            alt={tool.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.parentElement!.innerHTML = `<span class="font-bold text-lg text-purple-400">${tool.name.charAt(0)}</span>`;
+                            }}
+                          />
+                        </div>
+                        <h3 className="font-bold text-lg text-white leading-tight truncate">{tool.name}</h3>
+                      </div>
+
+                      {/* Badge Prix */}
                       <span className="text-xs bg-slate-800 text-slate-300 py-1 px-2 rounded border border-slate-700 shrink-0">{tool.pricing}</span>
                     </div>
-                    {/* Affichage conditionnel de la description selon la langue */}
+
+                    {/* Description */}
                     <p className="text-sm text-slate-400 mb-4 line-clamp-2">
                       {locale === 'fr' 
                         ? (tool.description_fr || tool.description_en) 
                         : (tool.description_en || tool.description_fr)}
                     </p>
                   </div>
-                  <a href={tool.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-cyan-400 hover:text-cyan-300 flex items-center gap-1 w-fit">
+                  
+                  {/* Lien Visiter */}
+                  <a href={tool.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-cyan-400 hover:text-cyan-300 flex items-center gap-1 w-fit mt-2">
                     {t('Recent.visit')} <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
