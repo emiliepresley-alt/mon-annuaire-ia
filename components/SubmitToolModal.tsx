@@ -151,11 +151,11 @@ export default function SubmitToolModal({ isOpen, onClose }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1.5">{t('descLabelFr')}</label>
-                  <input type="text" name="description_fr" value={formData.description_fr} onChange={handleChange} maxLength="100" placeholder={t('descPlaceholderFr')} className="w-full bg-[#0b0c10] border border-slate-700 rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-purple-500 transition-colors text-white" />
+                  <input type="text" name="description_fr" value={formData.description_fr} onChange={handleChange} maxLength={100} placeholder={t('descPlaceholderFr')} className="w-full bg-[#0b0c10] border border-slate-700 rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-purple-500 transition-colors text-white" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1.5">{t('descLabelEn')}</label>
-                  <input type="text" name="description_en" value={formData.description_en} onChange={handleChange} maxLength="100" placeholder={t('descPlaceholderEn')} className="w-full bg-[#0b0c10] border border-slate-700 rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-purple-500 transition-colors text-white" />
+                  <input type="text" name="description_en" value={formData.description_en} onChange={handleChange} maxLength={100} placeholder={t('descPlaceholderEn')} className="w-full bg-[#0b0c10] border border-slate-700 rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-purple-500 transition-colors text-white" />
                 </div>
               </div>
               
