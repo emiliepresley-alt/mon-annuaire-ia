@@ -1,0 +1,94 @@
+{
+  "Header": {
+    "title": "Artificial Intelligence Directory",
+    "subtitle": "Discover the best AI tools and resources.",
+    "searchPlaceholder": "Search for a tool...",
+    "submitButton": "Submit a tool"
+  },
+  "Filters": {
+    "title": "Filters",
+    "subtitle": "Refine your search with cross-cutting criteria.",
+    "price": "Price",
+    "access": "Access type",
+    "prices": {
+      "free": "Free",
+      "freemium": "Freemium",
+      "paid": "Paid",
+      "trial": "Free Trial",
+      "openSource": "Open Source"
+    },
+    "accessTypes": {
+      "chrome": "Chrome Extension",
+      "web": "Web App",
+      "api": "API",
+      "desktop": "Desktop/Mobile App"
+    }
+  },
+  "Categories": {
+    "usageTitle": "1. By Use Case",
+    "usageSubtitle": "(Creation & Media)",
+    "metierTitle": "2. By Job & Industry",
+    "techTitle": "3. Models, Infrastructure & AI Development",
+    "texte": { "title": "Text & Writing", "desc1": "Copywriting, article generation", "desc2": "correction/rewriting, translation", "desc3": "document summarization" },
+    "image": { "title": "Image & Visual Art", "desc1": "Image generation (Text-to-Image)", "desc2": "editing & retouching, background removal", "desc3": "logo/avatar creation" },
+    "video": { "title": "Video & Animation", "desc1": "Video generation (Text-to-Video)", "desc2": "virtual avatars/spokespersons", "desc3": "automatic editing, subtitling" },
+    "audio": { "title": "Audio & Music", "desc1": "Text-to-Speech synthesis", "desc2": "voice cloning, music creation", "desc3": "audio cleaning & noise reduction" },
+    "design": { "title": "Design & UI/UX", "desc1": "Mockup generation", "desc2": "presentation creation (slides)", "desc3": "user research, prototyping" },
+    "code": { "title": "Development & Code", "desc1": "Code assistants (copilots)", "desc2": "SQL query generation", "desc3": "debugging, language conversion" },
+    "marketing": { "title": "Marketing & SEO", "desc1": "Search engine optimization", "desc2": "social media management", "desc3": "ad generation, sentiment analysis" },
+    "support": { "title": "Sales & Customer Support", "desc1": "Chatbots/conversational agents", "desc2": "lead qualification", "desc3": "email automation, smart CRMs" },
+    "productivite": { "title": "Productivity & Management", "desc1": "Meeting notes (transcript)", "desc2": "project management", "desc3": "email organization, workflow automation" },
+    "finance": { "title": "Finance & Legal", "desc1": "Contract analysis", "desc2": "automated accounting", "desc3": "fraud detection, financial forecasting" },
+    "education": { "title": "Education & Research", "desc1": "Academic research", "desc2": "virtual tutors", "desc3": "homework help, quiz generation" },
+    "llm": { "title": "LLMs & Foundation Models", "desc1": "Open-source models", "desc2": "proprietary models", "desc3": "AI APIs" },
+    "prompt": { "title": "Prompt Engineering & Management", "desc1": "Prompt libraries", "desc2": "prompt testers", "desc3": "context managers" },
+    "data": { "title": "Data & Machine Learning", "desc1": "Data labeling", "desc2": "vector databases", "desc3": "ML pipelines, model training" },
+    "agents": { "title": "AI Agents & Automation", "desc1": "Autonomous agent frameworks", "desc2": "AI workflow orchestrators", "desc3": "" }
+  },
+  "Recent": {
+    "title": "✨ Latest approved tools",
+    "noTools": "No tools have been approved yet. Be the first!",
+    "visit": "Visit website"
+  },
+  "Modal": {
+    "title": "Submit a new AI tool",
+    "subtitle": "Help the community discover the best gems.",
+    "nameLabel": "Tool name",
+    "urlLabel": "Link (URL)",
+    "descLabel": "Short tagline",
+    "descPlaceholder": "In one sentence, what is this tool used for?",
+    "categoryLabel": "Main category",
+    "categoryPlaceholder": "Select a category",
+    "pricingLabel": "Pricing model",
+    "contributorLabel": "Your name / Nickname (Optional)",
+    "contributorPlaceholder": "To be credited (e.g., @JohnDoe)",
+    "cancel": "Cancel",
+    "submit": "Submit tool",
+    "submitting": "Submitting...",
+    "successTitle": "Thank you for your contribution!",
+    "successDesc1": "The tool",
+    "successDesc2": "has been received. Our team will review it.",
+    "descLabelFr": "Short tagline (French)",
+    "descLabelEn": "Short tagline (English)",
+    "descPlaceholderFr": "En 1 phrase en français...",
+    "descPlaceholderEn": "In 1 sentence in English...",
+    "descError": "Veuillez remplir au moins une accroche (français ou anglais).",
+    "close": "Close"
+  },
+  "CategoryPage": {
+    "shortTitle": "AI Directory",
+    "home": "Home",
+    "searchPlaceholder": "Search in this category...",
+    "title": "Tools: {category}",
+    "subtitle": "Discover the best AI tools for this category.",
+    "toolsFound": "{count} tool(s) found",
+    "filtersTitle": "Filters",
+    "pricingModel": "Pricing model",
+    "noToolsTitle": "No tools found",
+    "noToolsDesc": "There are no tools in this category yet, or they don't match your filters.",
+    "backHome": "Back to home",
+    "submittedBy": "Submitted by:",
+    "anonymous": "Anonymous",
+    "visit": "Visit"
+  }
+}

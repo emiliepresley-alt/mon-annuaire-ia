@@ -1,0 +1,94 @@
+{
+  "Header": {
+    "title": "Annuaire de l'Intelligence Artificielle",
+    "subtitle": "Découvrez les meilleurs outils et ressources IA.",
+    "searchPlaceholder": "Rechercher un outil...",
+    "submitButton": "Proposer un outil"
+  },
+  "Filters": {
+    "title": "Filtres",
+    "subtitle": "Affinez votre recherche avec des critères transversaux.",
+    "price": "Prix",
+    "access": "Type d'accès",
+    "prices": {
+      "free": "Gratuit",
+      "freemium": "Freemium",
+      "paid": "Payant",
+      "trial": "Essai gratuit",
+      "openSource": "Open Source"
+    },
+    "accessTypes": {
+      "chrome": "Extension Chrome",
+      "web": "Web App",
+      "api": "API",
+      "desktop": "Application Desktop/Mobile"
+    }
+  },
+  "Categories": {
+    "usageTitle": "1. Par Cas d'Usage",
+    "usageSubtitle": "(Création & Média)",
+    "metierTitle": "2. Par Métier & Secteur d'Activité",
+    "techTitle": "3. Modèles, Infrastructure & Développement IA",
+    "texte": { "title": "Texte & Rédaction", "desc1": "Copywriting, génération d'articles", "desc2": "correction/réécriture, traduction", "desc3": "résumés de documents" },
+    "image": { "title": "Image & Art Visuel", "desc1": "Génération d'images (Text-to-Image)", "desc2": "édition & retouche, suppression de fond", "desc3": "création de logos/avatars" },
+    "video": { "title": "Vidéo & Animation", "desc1": "Génération vidéo (Text-to-Video)", "desc2": "avatars virtuels/porte-paroles", "desc3": "montage automatique, sous-titrage" },
+    "audio": { "title": "Audio & Musique", "desc1": "Synthèse vocale (Text-to-Speech)", "desc2": "clonage de voix, création musicale", "desc3": "nettoyage audio & réduction de bruit" },
+    "design": { "title": "Design & UI/UX", "desc1": "Génération de maquettes", "desc2": "création de présentations (slides)", "desc3": "recherche utilisateur, prototypage" },
+    "code": { "title": "Développement & Code", "desc1": "Assistants de code (copilots)", "desc2": "génération de requêtes SQL", "desc3": "débogage, conversion de langages" },
+    "marketing": { "title": "Marketing & SEO", "desc1": "Optimisation pour moteurs de recherche", "desc2": "gestion des réseaux sociaux", "desc3": "génération de publicités, analyse de sentiments" },
+    "support": { "title": "Vente & Support Client", "desc1": "Chatbots/agents conversationnels", "desc2": "qualification de leads", "desc3": "automatisation d'emails, CRM intelligents" },
+    "productivite": { "title": "Productivité & Gestion", "desc1": "Prise de notes de réunion (transcript)", "desc2": "gestion de projet", "desc3": "organisation d'emails, automatisation de workflows" },
+    "finance": { "title": "Finance & Juridique", "desc1": "Analyse de contrats", "desc2": "comptabilité automatisée", "desc3": "détection de fraudes, prévisions financières" },
+    "education": { "title": "Éducation & Recherche", "desc1": "Recherche académique", "desc2": "tuteurs virtuels", "desc3": "aide au devoir, génération de QCM" },
+    "llm": { "title": "LLMs & Modèles de Fond", "desc1": "Modèles open-source", "desc2": "modèles propriétaires", "desc3": "API d'IA" },
+    "prompt": { "title": "Prompt Engineering & Management", "desc1": "Bibliothèques de prompts", "desc2": "testeurs de prompts", "desc3": "gestionnaires de contexte" },
+    "data": { "title": "Data & Machine Learning", "desc1": "Labellisation de données", "desc2": "bases de données vectorielles (Vector DBs)", "desc3": "pipelines ML, entraînement de modèles" },
+    "agents": { "title": "Agents IA & Automatisation", "desc1": "Frameworks d'agents autonomes", "desc2": "orchestrateurs de workflows IA", "desc3": "" }
+  },
+  "Recent": {
+    "title": "✨ Derniers outils approuvés",
+    "noTools": "Aucun outil n'a encore été approuvé. Soyez le premier !",
+    "visit": "Visiter le site"
+  },
+  "Modal": {
+    "title": "Proposer un nouvel outil IA",
+    "subtitle": "Aidez la communauté à découvrir les meilleures pépites.",
+    "nameLabel": "Nom de l'outil",
+    "urlLabel": "Lien (URL)",
+    "descLabel": "Accroche courte",
+    "descPlaceholder": "En 1 phrase, à quoi sert cet outil ?",
+    "categoryLabel": "Catégorie principale",
+    "categoryPlaceholder": "Sélectionnez une catégorie",
+    "pricingLabel": "Modèle d'accès",
+    "contributorLabel": "Votre nom / Pseudo (Optionnel)",
+    "contributorPlaceholder": "Pour être crédité (ex: @JeanDupont)",
+    "cancel": "Annuler",
+    "submit": "Soumettre l'outil",
+    "submitting": "Envoi...",
+    "successTitle": "Merci pour votre contribution !",
+    "successDesc1": "L'outil",
+    "successDesc2": "a bien été reçu. Notre équipe va le vérifier.",
+	"descLabelFr": "Accroche courte (Français)",
+    "descLabelEn": "Accroche courte (Anglais)",
+    "descPlaceholderFr": "En 1 phrase en français...",
+    "descPlaceholderEn": "In 1 sentence in English...",
+    "descError": "Veuillez remplir au moins une accroche (français ou anglais).",
+    "close": "Fermer"
+  },
+  "CategoryPage": {
+    "shortTitle": "Annuaire de l'IA",
+    "home": "Accueil",
+    "searchPlaceholder": "Rechercher dans cette catégorie...",
+    "title": "Outils : {category}",
+    "subtitle": "Découvrez les meilleurs outils d'IA pour cette catégorie.",
+    "toolsFound": "{count} outil(s) trouvé(s)",
+    "filtersTitle": "Filtres",
+    "pricingModel": "Modèle économique",
+    "noToolsTitle": "Aucun outil trouvé",
+    "noToolsDesc": "Il n'y a pas encore d'outil dans cette catégorie ou ils ne correspondent pas à vos filtres.",
+    "backHome": "Retour à l'accueil",
+    "submittedBy": "Proposé par :",
+    "anonymous": "Anonyme",
+    "visit": "Visiter"
+  }
+}
