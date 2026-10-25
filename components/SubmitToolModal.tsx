@@ -4,33 +4,35 @@ import { X, CheckCircle2, Loader2, Sparkles } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Turnstile } from '@marsidev/react-turnstile'; 
 
-export default function SubmitToolModal({ isOpen, onClose }) {
+export default function SubmitToolModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const t = useTranslations('Modal'); 
-  const tCat = useTranslations('Categories'); // <-- Pour les catégories
-  const tFilters = useTranslations('Filters'); // <-- Pour les prix
+  const tCat = useTranslations('Categories'); 
+  const tFilters = useTranslations('Filters'); 
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState(null);
+  // Correction 1 : Autoriser string ou null
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   
+  // Correction 2 : Typer le tableau categories
   const [formData, setFormData] = useState({
     name: '', url: '', description_fr: '', description_en: '', 
-    categories: [], 
+    categories: [] as string[], 
     pricing: 'Freemium', contributor: ''
   });
 
   useEffect(() => {
-    const handleKeyDown = (e) => { if (e.key === 'Escape') handleClose(); };
+    const handleKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose(); };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleCategoryToggle = (slug) => {
+  const handleCategoryToggle = (slug: string) => {
     setFormData(prev => {
       const isSelected = prev.categories.includes(slug);
       return {
@@ -42,7 +44,7 @@ export default function SubmitToolModal({ isOpen, onClose }) {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.description_fr.trim() && !formData.description_en.trim()) {
@@ -80,7 +82,7 @@ export default function SubmitToolModal({ isOpen, onClose }) {
 
       setIsSuccess(true); 
 
-    } catch (error) {
+    } catch (error: any) {
       alert("Erreur : " + error.message);
     } finally {
       setIsSubmitting(false);
@@ -187,7 +189,6 @@ export default function SubmitToolModal({ isOpen, onClose }) {
                         onChange={() => handleCategoryToggle(cat.slug)}
                         className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-purple-500 focus:ring-purple-500/20" 
                       />
-                      {/* Traduction du titre de la catégorie */}
                       <span className="text-sm text-slate-300">{tCat(`${cat.slug}.title`)}</span>
                     </label>
                   ))}
@@ -206,7 +207,6 @@ export default function SubmitToolModal({ isOpen, onClose }) {
                   ].map((price) => (
                     <label key={price.value} className={`cursor-pointer border rounded-lg py-2 text-center text-sm transition-all ${formData.pricing === price.value ? 'bg-purple-500/20 border-purple-500 text-purple-300 font-medium' : 'bg-[#0b0c10] border-slate-700 text-slate-400 hover:border-slate-500'}`}>
                       <input type="radio" name="pricing" value={price.value} checked={formData.pricing === price.value} onChange={handleChange} className="hidden" />
-                      {/* Traduction du prix */}
                       {tFilters(`prices.${price.key}`)}
                     </label>
                   ))}
