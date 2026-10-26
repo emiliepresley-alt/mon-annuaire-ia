@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { CheckCircle, XCircle, Clock, ExternalLink, Loader2, ArrowLeft, Pencil, X, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import { LogOut } from 'lucide-react'; // Ajoute LogOut aux icônes existantes
 const predefinedTags = [
   "Chatbot", "Copywriting", "Traduction", "Résumé", 
@@ -66,7 +67,7 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [session, setSession] = useState<any>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-
+  const locale = useLocale();
   // Vérification de la session
   useEffect(() => {
     const checkAuth = async () => {
@@ -239,9 +240,9 @@ export default function AdminDashboard() {
         
         <div className="flex items-center justify-between mb-8 border-b border-slate-800 pb-6">
           <div>
-            <Link href="/" className="text-sm text-slate-400 hover:text-white flex items-center gap-2 mb-2 transition-colors">
-              <ArrowLeft className="w-4 h-4" /> Retour au site
-            </Link>
+<Link href={`/${locale}`} className="text-sm text-slate-400 hover:text-white flex items-center gap-2 mb-2 transition-colors">
+  <ArrowLeft className="w-4 h-4" /> Retour au site
+</Link>
             <h1 className="text-3xl font-bold text-white flex items-center gap-3">
               <Clock className="w-8 h-8 text-purple-500" />
               Gestion des outils
