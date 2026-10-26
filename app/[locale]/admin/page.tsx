@@ -2,10 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase'; 
 import Link from 'next/link';
-import { CheckCircle, XCircle, Clock, ExternalLink, Loader2, ArrowLeft, Pencil, X, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, ExternalLink, Loader2, ArrowLeft, Pencil, X, Trash2, ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
-import { LogOut } from 'lucide-react'; // Ajoute LogOut aux icônes existantes
+
 const predefinedTags = [
   "Chatbot", "Copywriting", "Traduction", "Résumé", 
   "Text-to-Image", "Text-to-Video", "Text-to-Speech", 
@@ -16,21 +16,18 @@ const predefinedTags = [
 
 const ITEMS_PER_PAGE = 10;
 
-// ✅ Fonction pour calculer les numéros de page intelligemment
 const getPaginationRange = (current: number, total: number) => {
-  const delta = 1; // Nombre de pages à afficher à gauche et à droite de la page actuelle
+  const delta = 1;
   const range = [];
   const rangeWithDots = [];
   let l;
 
   for (let i = 1; i <= total; i++) {
-    // On garde toujours la page 1, la dernière page, et celles autour de la page actuelle
     if (i === 1 || i === total || (i >= current - delta && i <= current + delta)) {
       range.push(i);
     }
   }
 
-  // On ajoute les points de suspension si nécessaire
   for (let i of range) {
     if (l) {
       if (i - l === 2) {
@@ -47,6 +44,9 @@ const getPaginationRange = (current: number, total: number) => {
 };
 
 export default function AdminDashboard() {
+  const router = useRouter();
+  const locale = useLocale(); 
+  
   const [tools, setTools] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
@@ -64,16 +64,16 @@ export default function AdminDashboard() {
     pricing: ''
   });
   const [isSaving, setIsSaving] = useState(false);
-  const router = useRouter();
+  
   const [session, setSession] = useState<any>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const locale = useLocale();
-  // Vérification de la session
+
+  // ✅ CORRECTION 1 : Redirection vers /{locale}/login
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        router.push('/login'); // Si pas connecté, on redirige
+        router.push(`/${locale}/login`); 
       } else {
         setSession(session);
         setIsCheckingAuth(false);
@@ -82,16 +82,17 @@ export default function AdminDashboard() {
     checkAuth();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) router.push('/login');
+      if (!session) router.push(`/${locale}/login`);
     });
 
     return () => authListener.subscription.unsubscribe();
-  }, [router]);
+  }, [router, locale]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push('/login');
+    router.push(`/${locale}/login`);
   };
+
   const fetchTools = async () => {
     setIsLoading(true);
     setErrorMsg('');
@@ -117,8 +118,8 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    fetchTools();
-  }, [activeTab, currentPage]);
+    if (session) fetchTools();
+  }, [activeTab, currentPage, session]);
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -227,6 +228,7 @@ export default function AdminDashboard() {
   };
 
   const totalPages = Math.ceil(totalTools / ITEMS_PER_PAGE);
+
   if (isCheckingAuth) {
     return (
       <div className="min-h-screen bg-[#0b0c10] flex items-center justify-center">
@@ -234,37 +236,35 @@ export default function AdminDashboard() {
       </div>
     );
   }
+
   return (
     <div className="min-h-screen bg-[#0b0c10] text-slate-200 font-sans p-6">
       <div className="max-w-5xl mx-auto">
         
-        <div className="flex items-center justify-between mb-8 border-b border-slate-800 pb-6">
+        {/* ✅ CORRECTION 2 : Header propre avec le bouton Déconnexion bien placé */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 border-b border-slate-800 pb-6 gap-4">
           <div>
-<Link href={`/${locale}`} className="text-sm text-slate-400 hover:text-white flex items-center gap-2 mb-2 transition-colors">
-  <ArrowLeft className="w-4 h-4" /> Retour au site
-</Link>
+            <Link href={`/${locale}`} className="text-sm text-slate-400 hover:text-white flex items-center gap-2 mb-2 transition-colors">
+              <ArrowLeft className="w-4 h-4" /> Retour au site
+            </Link>
             <h1 className="text-3xl font-bold text-white flex items-center gap-3">
               <Clock className="w-8 h-8 text-purple-500" />
               Gestion des outils
             </h1>
           </div>
-          <div className="bg-[#13141b] border border-slate-700 py-2 px-4 rounded-lg flex items-center gap-3">
-            <span className="text-sm text-slate-400">Total :</span>
-            <span className="text-xl font-bold text-purple-400">{totalTools}</span>
+          
+          <div className="flex items-center gap-4">
+            <div className="bg-[#13141b] border border-slate-700 py-2 px-4 rounded-lg flex items-center gap-3">
+              <span className="text-sm text-slate-400">Total :</span>
+              <span className="text-xl font-bold text-purple-400">{totalTools}</span>
+            </div>
+            <button 
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2.5 bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 rounded-lg transition-colors text-sm font-medium"
+            >
+              <LogOut className="w-4 h-4" /> Déconnexion
+            </button>
           </div>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="bg-[#13141b] border border-slate-700 py-2 px-4 rounded-lg flex items-center gap-3">
-            <span className="text-sm text-slate-400">Total :</span>
-            <span className="text-xl font-bold text-purple-400">{totalTools}</span>
-          </div>
-          <button 
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 rounded-lg transition-colors"
-          >
-            <LogOut className="w-4 h-4" /> Déconnexion
-          </button>
         </div>
 
         <div className="flex space-x-2 mb-6 bg-[#13141b] p-1 rounded-lg w-fit border border-slate-800">
@@ -392,7 +392,6 @@ export default function AdminDashboard() {
               ))}
             </div>
 
-            {/* 👇 NOUVELLE PAGINATION INTELLIGENTE 👇 */}
             {totalPages > 1 && (
               <div className="flex justify-center items-center mt-8 pt-6 border-t border-slate-800 gap-2">
                 <button 
@@ -435,7 +434,6 @@ export default function AdminDashboard() {
           </>
         )}
 
-        {/* MODALE D'ÉDITION */}
         {editingTool && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setEditingTool(null)}></div>
