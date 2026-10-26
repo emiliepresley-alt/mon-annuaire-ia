@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase'; 
 import Link from 'next/link';
 import { CheckCircle, XCircle, Clock, ExternalLink, Loader2, ArrowLeft, Pencil, X, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
-
+import { useRouter } from 'next/navigation';
+import { LogOut } from 'lucide-react'; // Ajoute LogOut aux icônes existantes
 const predefinedTags = [
   "Chatbot", "Copywriting", "Traduction", "Résumé", 
   "Text-to-Image", "Text-to-Video", "Text-to-Speech", 
@@ -62,7 +63,34 @@ export default function AdminDashboard() {
     pricing: ''
   });
   const [isSaving, setIsSaving] = useState(false);
+  const router = useRouter();
+  const [session, setSession] = useState<any>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
+  // Vérification de la session
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push('/login'); // Si pas connecté, on redirige
+      } else {
+        setSession(session);
+        setIsCheckingAuth(false);
+      }
+    };
+    checkAuth();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) router.push('/login');
+    });
+
+    return () => authListener.subscription.unsubscribe();
+  }, [router]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/login');
+  };
   const fetchTools = async () => {
     setIsLoading(true);
     setErrorMsg('');
@@ -198,7 +226,13 @@ export default function AdminDashboard() {
   };
 
   const totalPages = Math.ceil(totalTools / ITEMS_PER_PAGE);
-
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-[#0b0c10] flex items-center justify-center">
+        <Loader2 className="w-10 h-10 text-purple-500 animate-spin" />
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-[#0b0c10] text-slate-200 font-sans p-6">
       <div className="max-w-5xl mx-auto">
@@ -217,6 +251,19 @@ export default function AdminDashboard() {
             <span className="text-sm text-slate-400">Total :</span>
             <span className="text-xl font-bold text-purple-400">{totalTools}</span>
           </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="bg-[#13141b] border border-slate-700 py-2 px-4 rounded-lg flex items-center gap-3">
+            <span className="text-sm text-slate-400">Total :</span>
+            <span className="text-xl font-bold text-purple-400">{totalTools}</span>
+          </div>
+          <button 
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-4 py-2 bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 rounded-lg transition-colors"
+          >
+            <LogOut className="w-4 h-4" /> Déconnexion
+          </button>
         </div>
 
         <div className="flex space-x-2 mb-6 bg-[#13141b] p-1 rounded-lg w-fit border border-slate-800">
