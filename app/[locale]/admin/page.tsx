@@ -2,9 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase'; 
 import Link from 'next/link';
-import { CheckCircle, XCircle, Clock, ExternalLink, Loader2, ArrowLeft, Pencil, X, Trash2 } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, ExternalLink, Loader2, ArrowLeft, Pencil, X, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 
-// ✅ 1. LA LISTE DES TAGS EST ICI
 const predefinedTags = [
   "Chatbot", "Copywriting", "Traduction", "Résumé", 
   "Text-to-Image", "Text-to-Video", "Text-to-Speech", 
@@ -13,48 +12,64 @@ const predefinedTags = [
   "Productivité", "Design UI/UX", "SEO", "Recherche"
 ];
 
+const ITEMS_PER_PAGE = 10; // Nombre d'outils à afficher par page
+
 export default function AdminDashboard() {
   const [tools, setTools] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
   
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalTools, setTotalTools] = useState(0);
+
   const [activeTab, setActiveTab] = useState('pending'); 
 
   const [editingTool, setEditingTool] = useState(null);
-  
-  // ✅ 2. ON AJOUTE "tags: []" DANS L'ÉTAT INITIAL
   const [editFormData, setEditFormData] = useState({
     name: '', url: '', description_fr: '', description_en: '', 
     categories: [] as string[], 
     tags: [] as string[], 
     pricing: ''
   });
-  
   const [isSaving, setIsSaving] = useState(false);
 
   const fetchTools = async () => {
     setIsLoading(true);
     setErrorMsg('');
     
-    const { data, error } = await supabase
+    // Calcul de la plage de données à récupérer (ex: de 0 à 9 pour la page 1)
+    const from = (currentPage - 1) * ITEMS_PER_PAGE;
+    const to = from + ITEMS_PER_PAGE - 1;
+
+    const { data, count, error } = await supabase
       .from('tools')
-      .select('*')
+      .select('*', { count: 'exact' }) // 'count: exact' permet de savoir combien il y a de résultats au total
       .eq('status', activeTab)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .range(from, to); // On ne récupère que la tranche pour la page actuelle
 
     if (error) {
       console.error(error);
       setErrorMsg("Erreur de chargement. Vérifiez vos règles de sécurité (RLS).");
     } else {
       setTools(data || []);
+      setTotalTools(count || 0);
     }
     setIsLoading(false);
   };
 
+  // On recharge quand on change d'onglet ou de page
   useEffect(() => {
     fetchTools();
-  }, [activeTab]);
+  }, [activeTab, currentPage]);
+
+  // Si on change d'onglet, on revient à la page 1
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    setCurrentPage(1);
+  };
 
   const handleStatusUpdate = async (id, newStatus) => {
     setActionLoading(id);
@@ -66,7 +81,7 @@ export default function AdminDashboard() {
     if (error) {
       alert("Erreur : " + error.message);
     } else {
-      fetchTools();
+      fetchTools(); // Recharge la liste actuelle
     }
     setActionLoading(null);
   };
@@ -80,14 +95,18 @@ export default function AdminDashboard() {
     if (error) {
       alert("Erreur : " + error.message);
     } else {
-      fetchTools();
+      // Si on supprime le dernier élément d'une page, on recule d'une page
+      if (tools.length === 1 && currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      } else {
+        fetchTools();
+      }
     }
     setActionLoading(null);
   };
 
   const openEditModal = (tool) => {
     setEditingTool(tool);
-    // ✅ 3. ON RÉCUPÈRE LES TAGS EXISTANTS
     setEditFormData({
       name: tool.name || '',
       url: tool.url || '',
@@ -104,7 +123,7 @@ export default function AdminDashboard() {
     setEditFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleCategoryToggle = (slug) => {
+  const handleCategoryToggle = (slug: string) => {
     setEditFormData(prev => {
       const isSelected = prev.categories.includes(slug);
       return {
@@ -116,8 +135,7 @@ export default function AdminDashboard() {
     });
   };
 
-  // ✅ 4. LA FONCTION POUR GÉRER LES TAGS
-  const handleTagToggle = (tag) => {
+  const handleTagToggle = (tag: string) => {
     setEditFormData(prev => {
       const isSelected = prev.tags.includes(tag);
       return {
@@ -133,7 +151,6 @@ export default function AdminDashboard() {
     e.preventDefault();
     setIsSaving(true);
 
-    // ✅ 5. ON SAUVEGARDE LES TAGS DANS SUPABASE
     const { error } = await supabase
       .from('tools')
       .update({
@@ -156,6 +173,9 @@ export default function AdminDashboard() {
     setIsSaving(false);
   };
 
+  // Calcul du nombre total de pages
+  const totalPages = Math.ceil(totalTools / ITEMS_PER_PAGE);
+
   return (
     <div className="min-h-screen bg-[#0b0c10] text-slate-200 font-sans p-6">
       <div className="max-w-5xl mx-auto">
@@ -170,23 +190,28 @@ export default function AdminDashboard() {
               Gestion des outils
             </h1>
           </div>
+          <div className="bg-[#13141b] border border-slate-700 py-2 px-4 rounded-lg flex items-center gap-3">
+            <span className="text-sm text-slate-400">Total :</span>
+            <span className="text-xl font-bold text-purple-400">{totalTools}</span>
+          </div>
         </div>
 
+        {/* ONGLETS DE NAVIGATION */}
         <div className="flex space-x-2 mb-6 bg-[#13141b] p-1 rounded-lg w-fit border border-slate-800">
           <button 
-            onClick={() => setActiveTab('pending')}
+            onClick={() => handleTabChange('pending')}
             className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'pending' ? 'bg-slate-800 text-white shadow' : 'text-slate-400 hover:text-white'}`}
           >
             En attente
           </button>
           <button 
-            onClick={() => setActiveTab('approved')}
+            onClick={() => handleTabChange('approved')}
             className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'approved' ? 'bg-slate-800 text-emerald-400 shadow' : 'text-slate-400 hover:text-white'}`}
           >
             Approuvés
           </button>
           <button 
-            onClick={() => setActiveTab('rejected')}
+            onClick={() => handleTabChange('rejected')}
             className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'rejected' ? 'bg-slate-800 text-red-400 shadow' : 'text-slate-400 hover:text-white'}`}
           >
             Refusés
@@ -211,94 +236,120 @@ export default function AdminDashboard() {
             <p className="text-slate-400">Il n'y a pas d'outil dans cette catégorie pour le moment.</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {tools.map((tool) => (
-              <div key={tool.id} className="bg-[#13141b] border border-slate-700 rounded-xl p-5 flex flex-col md:flex-row md:items-start justify-between gap-6">
-                
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2 flex-wrap">
-                    <h3 className="text-xl font-bold text-white">{tool.name}</h3>
-                    <span className="text-xs bg-slate-800 text-slate-300 py-1 px-2 rounded border border-slate-700">
-                      {tool.pricing}
-                    </span>
-                    <div className="flex gap-1 flex-wrap">
-                      {tool.categories && tool.categories.map(cat => (
-                        <span key={cat} className="text-xs bg-purple-500/20 text-purple-300 py-1 px-2 rounded border border-purple-500/30">
-                          {cat}
-                        </span>
-                      ))}
-                      {/* ✅ 6. AFFICHAGE DES TAGS SUR LA CARTE ADMIN */}
-                      {tool.tags && tool.tags.map(tag => (
-                        <span key={tag} className="text-xs bg-cyan-500/10 text-cyan-400 py-1 px-2 rounded border border-cyan-500/20">
-                          {tag}
-                        </span>
-                      ))}
+          <>
+            <div className="space-y-4">
+              {tools.map((tool) => (
+                <div key={tool.id} className="bg-[#13141b] border border-slate-700 rounded-xl p-5 flex flex-col md:flex-row md:items-start justify-between gap-6">
+                  
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2 flex-wrap">
+                      <h3 className="text-xl font-bold text-white">{tool.name}</h3>
+                      <span className="text-xs bg-slate-800 text-slate-300 py-1 px-2 rounded border border-slate-700">
+                        {tool.pricing}
+                      </span>
+                      <div className="flex gap-1 flex-wrap">
+                        {tool.categories && tool.categories.map(cat => (
+                          <span key={cat} className="text-xs bg-purple-500/20 text-purple-300 py-1 px-2 rounded border border-purple-500/30">
+                            {cat}
+                          </span>
+                        ))}
+                        {tool.tags && tool.tags.map(tag => (
+                          <span key={tag} className="text-xs bg-cyan-500/10 text-cyan-400 py-1 px-2 rounded border border-cyan-500/20">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="text-sm text-slate-400 mb-4 space-y-1 bg-[#0b0c10] p-3 rounded-lg border border-slate-800">
+                      {tool.description_fr && <p><strong className="text-slate-300">FR :</strong> {tool.description_fr}</p>}
+                      {tool.description_en && <p><strong className="text-slate-300">EN :</strong> {tool.description_en}</p>}
+                    </div>
+                    
+                    <div className="flex items-center gap-4 text-xs">
+                      <a href={tool.url} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-300 flex items-center gap-1">
+                        Visiter le site <ExternalLink className="w-3 h-3" />
+                      </a>
+                      <span className="text-slate-500">Proposé par : {tool.contributor || "Anonyme"}</span>
                     </div>
                   </div>
-                  
-                  <div className="text-sm text-slate-400 mb-4 space-y-1 bg-[#0b0c10] p-3 rounded-lg border border-slate-800">
-                    {tool.description_fr && <p><strong className="text-slate-300">FR :</strong> {tool.description_fr}</p>}
-                    {tool.description_en && <p><strong className="text-slate-300">EN :</strong> {tool.description_en}</p>}
-                  </div>
-                  
-                  <div className="flex items-center gap-4 text-xs">
-                    <a href={tool.url} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-300 flex items-center gap-1">
-                      Visiter le site <ExternalLink className="w-3 h-3" />
-                    </a>
-                    <span className="text-slate-500">Proposé par : {tool.contributor || "Anonyme"}</span>
-                  </div>
-                </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                  <button 
-                    onClick={() => openEditModal(tool)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors text-sm"
-                  >
-                    <Pencil className="w-4 h-4" /> Éditer
-                  </button>
-                  <button 
-                    onClick={() => handleDelete(tool.id)}
-                    disabled={actionLoading === tool.id}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-800 text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50 text-sm"
-                  >
-                    {actionLoading === tool.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                  </button>
-
-                  {activeTab === 'pending' && (
-                    <>
-                      <button 
-                        onClick={() => handleStatusUpdate(tool.id, 'rejected')}
-                        disabled={actionLoading === tool.id}
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-colors disabled:opacity-50 text-sm"
-                      >
-                        <XCircle className="w-4 h-4" /> Refuser
-                      </button>
-                      <button 
-                        onClick={() => handleStatusUpdate(tool.id, 'approved')}
-                        disabled={actionLoading === tool.id}
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30 transition-colors disabled:opacity-50 text-sm"
-                      >
-                        <CheckCircle className="w-4 h-4" /> Approuver
-                      </button>
-                    </>
-                  )}
-                  
-                  {activeTab === 'approved' && (
+                  <div className="flex flex-wrap items-center gap-2">
                     <button 
-                      onClick={() => handleStatusUpdate(tool.id, 'pending')}
-                      className="flex items-center gap-2 px-3 py-2 rounded-lg bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 border border-yellow-500/20 transition-colors text-sm"
+                      onClick={() => openEditModal(tool)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors text-sm"
                     >
-                      Mettre en attente
+                      <Pencil className="w-4 h-4" /> Éditer
                     </button>
-                  )}
-                </div>
+                    <button 
+                      onClick={() => handleDelete(tool.id)}
+                      disabled={actionLoading === tool.id}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-800 text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50 text-sm"
+                    >
+                      {actionLoading === tool.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                    </button>
 
+                    {activeTab === 'pending' && (
+                      <>
+                        <button 
+                          onClick={() => handleStatusUpdate(tool.id, 'rejected')}
+                          disabled={actionLoading === tool.id}
+                          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-colors disabled:opacity-50 text-sm"
+                        >
+                          <XCircle className="w-4 h-4" /> Refuser
+                        </button>
+                        <button 
+                          onClick={() => handleStatusUpdate(tool.id, 'approved')}
+                          disabled={actionLoading === tool.id}
+                          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30 transition-colors disabled:opacity-50 text-sm"
+                        >
+                          <CheckCircle className="w-4 h-4" /> Approuver
+                        </button>
+                      </>
+                    )}
+                    
+                    {activeTab === 'approved' && (
+                      <button 
+                        onClick={() => handleStatusUpdate(tool.id, 'pending')}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 border border-yellow-500/20 transition-colors text-sm"
+                      >
+                        Mettre en attente
+                      </button>
+                    )}
+                  </div>
+
+                </div>
+              ))}
+            </div>
+
+            {/* 👇 PAGINATION 👇 */}
+            {totalPages > 1 && (
+              <div className="flex justify-between items-center mt-8 pt-6 border-t border-slate-800">
+                <button 
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#13141b] border border-slate-700 rounded-lg text-sm text-slate-300 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Précédent
+                </button>
+                
+                <span className="text-sm text-slate-400">
+                  Page <strong className="text-white">{currentPage}</strong> sur {totalPages}
+                </span>
+
+                <button 
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#13141b] border border-slate-700 rounded-lg text-sm text-slate-300 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Suivant <ChevronRight className="w-4 h-4" />
+                </button>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
 
-        {/* MODALE D'ÉDITION */}
+        {/* MODALE D'ÉDITION (Identique) */}
         {editingTool && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setEditingTool(null)}></div>
@@ -340,8 +391,6 @@ export default function AdminDashboard() {
                       ))}
                     </div>
                   </div>
-                  
-                  {/* ✅ 7. LA SECTION TAGS DANS LA MODALE */}
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">Tags</label>
                     <div className="flex flex-wrap gap-2">
@@ -353,7 +402,6 @@ export default function AdminDashboard() {
                       ))}
                     </div>
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">Prix</label>
                     <select name="pricing" value={editFormData.pricing} onChange={handleEditChange} className="w-full bg-[#0b0c10] border border-slate-700 rounded-lg py-2 px-4 text-sm text-white">
