@@ -182,10 +182,26 @@ export default function CategoryPage() {
                         ? (tool.description_fr || tool.description_en) 
                         : (tool.description_en || tool.description_fr)}
                     </p>
+					{tool.tags && tool.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-4">
+                        {tool.tags.map(tag => (
+                          <span key={tag} className="text-[10px] bg-slate-800 text-cyan-400 px-2 py-0.5 rounded border border-slate-700">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+					
+					
+					
                   </div>
                   
                   <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-800/50">
                     <span className="text-xs text-slate-500">{t('submittedBy')} {tool.contributor || t('anonymous')}</span>
+					
+					
+					
                     <a href={tool.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-white flex items-center gap-1 hover:text-purple-400 transition-colors">
                       {t('visit')} <ExternalLink className="w-3 h-3" />
                     </a>

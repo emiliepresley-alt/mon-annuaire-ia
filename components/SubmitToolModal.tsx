@@ -4,6 +4,15 @@ import { X, CheckCircle2, Loader2, Sparkles } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Turnstile } from '@marsidev/react-turnstile'; 
 
+// On déclare les tags en dehors du composant (c'est plus propre)
+const predefinedTags = [
+  "Chatbot", "Copywriting", "Traduction", "Résumé", 
+  "Text-to-Image", "Text-to-Video", "Text-to-Speech", 
+  "Avatar", "Montage vidéo", "Édition photo", 
+  "Génération de code", "SQL", "API", "Automatisation", 
+  "Productivité", "Design UI/UX", "SEO", "Recherche"
+];
+
 export default function SubmitToolModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const t = useTranslations('Modal'); 
   const tCat = useTranslations('Categories'); 
@@ -11,13 +20,13 @@ export default function SubmitToolModal({ isOpen, onClose }: { isOpen: boolean, 
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  // Correction 1 : Autoriser string ou null
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   
-  // Correction 2 : Typer le tableau categories
+  // ✅ CORRECTION 1 : Ajout de "tags" dans le state initial
   const [formData, setFormData] = useState({
     name: '', url: '', description_fr: '', description_en: '', 
     categories: [] as string[], 
+    tags: [] as string[], // <-- Ajouté ici
     pricing: 'Freemium', contributor: ''
   });
 
@@ -40,6 +49,19 @@ export default function SubmitToolModal({ isOpen, onClose }: { isOpen: boolean, 
         categories: isSelected 
           ? prev.categories.filter(c => c !== slug) 
           : [...prev.categories, slug]
+      };
+    });
+  };
+
+  // ✅ CORRECTION 2 : Fonction déplacée au bon endroit et typée correctement
+  const handleTagToggle = (tag: string) => {
+    setFormData(prev => {
+      const isSelected = prev.tags.includes(tag);
+      return {
+        ...prev,
+        tags: isSelected 
+          ? prev.tags.filter(t => t !== tag) 
+          : [...prev.tags, tag]
       };
     });
   };
@@ -94,9 +116,10 @@ export default function SubmitToolModal({ isOpen, onClose }: { isOpen: boolean, 
     setTimeout(() => {
       setIsSuccess(false);
       setTurnstileToken(null); 
+      // ✅ CORRECTION 3 : Ajout de tags: [] lors de la réinitialisation
       setFormData({ 
         name: '', url: '', description_fr: '', description_en: '', 
-        categories: [], pricing: 'Freemium', contributor: '' 
+        categories: [], tags: [], pricing: 'Freemium', contributor: '' 
       });
     }, 300);
   };
@@ -161,7 +184,7 @@ export default function SubmitToolModal({ isOpen, onClose }: { isOpen: boolean, 
                 </div>
               </div>
               
-              {/* CASES À COCHER POUR LES CATÉGORIES (Traduites) */}
+              {/* CASES À COCHER POUR LES CATÉGORIES */}
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">{t('categoryLabel')} <span className="text-purple-400">*</span></label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -195,7 +218,20 @@ export default function SubmitToolModal({ isOpen, onClose }: { isOpen: boolean, 
                 </div>
               </div>
               
-              {/* PRIX (Traduits) */}
+              {/* TAGS */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Tags (Optionnel)</label>
+                <div className="flex flex-wrap gap-2">
+                  {predefinedTags.map((tag) => (
+                    <label key={tag} className={`cursor-pointer px-3 py-1 rounded-full text-xs font-medium border transition-colors ${formData.tags.includes(tag) ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300' : 'bg-[#0b0c10] border-slate-700 text-slate-400 hover:border-slate-500'}`}>
+                      <input type="checkbox" className="hidden" checked={formData.tags.includes(tag)} onChange={() => handleTagToggle(tag)} />
+                      {tag}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              
+              {/* PRIX */}
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">{t('pricingLabel')} <span className="text-purple-400">*</span></label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

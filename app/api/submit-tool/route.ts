@@ -24,7 +24,6 @@ export async function POST(request: Request) {
 
     const cloudflareData = await cloudflareRes.json();
 
-    // Si Cloudflare dit que ce n'est pas valide, on s'arrête là
     if (!cloudflareData.success) {
       return NextResponse.json({ error: "Vérification anti-bot échouée. Êtes-vous un robot ?" }, { status: 400 });
     }
@@ -46,11 +45,12 @@ export async function POST(request: Request) {
           url: formData.url, 
           description_fr: descFr,
           description_en: descEn,
-          categories: formData.categories, // <-- On passe le tableau ici
+          categories: formData.categories, 
+          tags: formData.tags || [], // 👈 C'EST ICI QU'ON AJOUTE LES TAGS
           pricing: formData.pricing,
           contributor: formData.contributor,
           status: 'pending',
-          language: language
+          language: language 
         }
       ]);
 
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // 3. SUCCÈS
+    // 4. SUCCÈS
     return NextResponse.json({ success: true }, { status: 200 });
 
   } catch (err) {

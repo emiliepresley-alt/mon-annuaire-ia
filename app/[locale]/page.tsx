@@ -93,23 +93,19 @@ export default function AnnuaireDesktop() {
   const locale = useLocale(); 
   
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
-  // Données globales
   const [allTools, setAllTools] = useState([]);
   const [counts, setCounts] = useState({});
   const [isLoadingData, setIsLoadingData] = useState(true);
 
-  // États des filtres (Maintenant connectés !)
   const [searchQuery, setSearchQuery] = useState("");
   const [priceFilters, setPriceFilters] = useState([]);
-  const [accessFilters, setAccessFilters] = useState([]); // Pas encore de colonne access dans la BDD, mais prêt
+  const [accessFilters, setAccessFilters] = useState([]);
 
   const switchLanguage = (newLocale: string) => {
     const newPath = pathname.replace(/^\/(fr|en)/, `/${newLocale}`);
     router.push(newPath);
   };
 
-  // Récupération Supabase
   useEffect(() => {
     const fetchData = async () => {
       const { data } = await supabase
@@ -121,7 +117,6 @@ export default function AnnuaireDesktop() {
 
       if (data) {
         setAllTools(data);
-        
         const calculatedCounts = {};
         data.forEach(tool => {
           if (tool.categories && Array.isArray(tool.categories)) {
@@ -138,23 +133,18 @@ export default function AnnuaireDesktop() {
     fetchData();
   }, [isModalOpen, locale]);
 
-  // Logique de filtrage (Recherche + Prix)
   const filteredTools = useMemo(() => {
     return allTools.filter(tool => {
       const descFr = tool.description_fr || "";
       const descEn = tool.description_en || "";
-      
       const matchesSearch = tool.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             descFr.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             descEn.toLowerCase().includes(searchQuery.toLowerCase());
-                            
       const matchesPrice = priceFilters.length === 0 || priceFilters.includes(tool.pricing);
-      
       return matchesSearch && matchesPrice;
     });
   }, [allTools, priceFilters, searchQuery]);
 
-  // Savoir si on doit afficher les catégories ou les résultats
   const isSearching = searchQuery.length > 0 || priceFilters.length > 0;
 
   const toggleFilter = (value, state, setState) => {
@@ -170,9 +160,7 @@ export default function AnnuaireDesktop() {
   return (
     <div className="min-h-screen bg-[#0b0c10] text-slate-200 font-sans selection:bg-purple-500/30">
       
-      {/* HEADER */}
       <header className="flex flex-col lg:flex-row items-center justify-between p-4 border-b border-slate-800 sticky top-0 bg-[#0b0c10]/90 backdrop-blur-md z-50 gap-4">
-        
         <div className="flex items-center gap-3 w-full lg:w-auto">
           <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-600 to-cyan-400 flex items-center justify-center shrink-0">
             <BrainCircuit className="text-white w-6 h-6" />
@@ -186,7 +174,6 @@ export default function AnnuaireDesktop() {
         </div>
 
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
-          
           <div className="flex gap-2 mr-2">
             <button onClick={() => switchLanguage('fr')} className={`text-sm font-bold transition-colors ${pathname.startsWith('/fr') ? 'text-purple-400' : 'text-slate-400 hover:text-white'}`}>FR</button>
             <span className="text-slate-600">|</span>
@@ -218,10 +205,8 @@ export default function AnnuaireDesktop() {
         </div>
       </header>
 
-      {/* MAIN LAYOUT */}
       <main className="max-w-[1600px] mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20">
         
-        {/* SIDEBAR FILTRES */}
         <aside className="hidden lg:block lg:col-span-3 space-y-6">
           <div className="bg-[#13141b] border border-slate-800 rounded-2xl p-5">
             <div className="flex items-center justify-between mb-4 text-cyan-400">
@@ -237,7 +222,6 @@ export default function AnnuaireDesktop() {
             </div>
             <p className="text-xs text-slate-400 mb-6">{tFilters('subtitle')}</p>
 
-            {/* FILTRE PRIX (Connecté) */}
             <div className="mb-6">
               <div className="flex items-center justify-between cursor-pointer mb-3">
                 <h3 className="font-medium text-sm text-slate-200">{tFilters('price')}</h3>
@@ -263,13 +247,12 @@ export default function AnnuaireDesktop() {
               </div>
             </div>
             
-            {/* FILTRE ACCÈS (Visuel pour l'instant) */}
             <div>
               <div className="flex items-center justify-between cursor-pointer mb-3">
                 <h3 className="font-medium text-sm text-slate-200">{tFilters('access')}</h3>
                 <ChevronDown className="w-4 h-4 text-slate-400" />
               </div>
-              <div className="space-y-2 opacity-50 pointer-events-none" title="Bientôt disponible">
+              <div className="space-y-2 opacity-50 pointer-events-none">
                 {['Web App', 'API', 'Extension Chrome', 'Desktop/Mobile'].map((item) => (
                   <label key={item} className="flex items-center gap-3 cursor-pointer group">
                     <input type="checkbox" className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-purple-500" />
@@ -282,10 +265,8 @@ export default function AnnuaireDesktop() {
           <AdBanner />
         </aside>
 
-        {/* CONTENU PRINCIPAL */}
         <div className="col-span-1 lg:col-span-9">
           
-          {/* SI ON CHERCHE OU FILTRE, ON AFFICHE LES RÉSULTATS */}
           {isSearching ? (
             <div>
               <h2 className="text-xl font-bold text-white mb-6">
@@ -298,24 +279,32 @@ export default function AnnuaireDesktop() {
                       <div>
                         <div className="flex justify-between items-start mb-3 gap-3">
                           <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center border border-slate-700 overflow-hidden shrink-0">
+                            <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center border border-slate-700 overflow-hidden shrink-0 relative">
+                              <span className="font-bold text-lg text-purple-400 absolute">{tool.name.charAt(0)}</span>
                               <img 
                                 src={`https://logo.clearbit.com/${new URL(tool.url).hostname}`} 
                                 alt={tool.name}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  e.currentTarget.style.display = 'none';
-                                  e.currentTarget.parentElement!.innerHTML = `<span class="font-bold text-lg text-purple-400">${tool.name.charAt(0)}</span>`;
-                                }}
+                                className="w-full h-full object-cover relative z-10 bg-[#13141b]"
+                                onError={(e) => { e.currentTarget.style.display = 'none'; }}
                               />
                             </div>
                             <h3 className="font-bold text-lg text-white leading-tight truncate">{tool.name}</h3>
                           </div>
                           <span className="text-xs bg-slate-800 text-slate-300 py-1 px-2 rounded border border-slate-700 shrink-0">{tool.pricing}</span>
                         </div>
-                        <p className="text-sm text-slate-400 mb-4 line-clamp-2">
+                        <p className="text-sm text-slate-400 mb-2 line-clamp-2">
                           {locale === 'fr' ? (tool.description_fr || tool.description_en) : (tool.description_en || tool.description_fr)}
                         </p>
+                        
+                        {tool.tags && tool.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mb-4">
+                            {tool.tags.map(tag => (
+                              <span key={tag} className="text-[10px] bg-slate-800 text-cyan-400 px-2 py-0.5 rounded border border-slate-700">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <a href={tool.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-cyan-400 hover:text-cyan-300 flex items-center gap-1 w-fit mt-2">
                         {t('Recent.visit')} <ExternalLink className="w-3 h-3" />
@@ -330,8 +319,6 @@ export default function AnnuaireDesktop() {
               )}
             </div>
           ) : (
-            
-            /* SINON, ON AFFICHE LES CATÉGORIES COMME AVANT */
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="bg-[#13141b] border border-slate-800 rounded-2xl p-5 shadow-lg h-fit">
@@ -365,7 +352,6 @@ export default function AnnuaireDesktop() {
                 </div>
               </div>
 
-              {/* DERNIERS AJOUTS */}
               <div className="mt-12">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="h-px bg-slate-800 flex-1"></div>
@@ -381,14 +367,25 @@ export default function AnnuaireDesktop() {
                         <div>
                           <div className="flex justify-between items-start mb-3 gap-3">
                             <div className="flex items-center gap-3 min-w-0">
-                              <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center border border-slate-700 overflow-hidden shrink-0">
-                                <img src={`https://logo.clearbit.com/${new URL(tool.url).hostname}`} alt={tool.name} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement!.innerHTML = `<span class="font-bold text-lg text-purple-400">${tool.name.charAt(0)}</span>`; }} />
+                              <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center border border-slate-700 overflow-hidden shrink-0 relative">
+                                <span className="font-bold text-lg text-purple-400 absolute">{tool.name.charAt(0)}</span>
+                                <img src={`https://logo.clearbit.com/${new URL(tool.url).hostname}`} alt={tool.name} className="w-full h-full object-cover relative z-10 bg-[#13141b]" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                               </div>
                               <h3 className="font-bold text-lg text-white leading-tight truncate">{tool.name}</h3>
                             </div>
                             <span className="text-xs bg-slate-800 text-slate-300 py-1 px-2 rounded border border-slate-700 shrink-0">{tool.pricing}</span>
                           </div>
-                          <p className="text-sm text-slate-400 mb-4 line-clamp-2">{locale === 'fr' ? (tool.description_fr || tool.description_en) : (tool.description_en || tool.description_fr)}</p>
+                          <p className="text-sm text-slate-400 mb-2 line-clamp-2">{locale === 'fr' ? (tool.description_fr || tool.description_en) : (tool.description_en || tool.description_fr)}</p>
+                          
+                          {tool.tags && tool.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mb-4">
+                              {tool.tags.map(tag => (
+                                <span key={tag} className="text-[10px] bg-slate-800 text-cyan-400 px-2 py-0.5 rounded border border-slate-700">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
                         <a href={tool.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-cyan-400 hover:text-cyan-300 flex items-center gap-1 w-fit mt-2">{t('Recent.visit')} <ExternalLink className="w-3 h-3" /></a>
                       </div>
