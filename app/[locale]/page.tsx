@@ -1,378 +1,406 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase'; 
-import Link from 'next/link';
-import { CheckCircle, XCircle, Clock, ExternalLink, Loader2, ArrowLeft, Pencil, X, Trash2 } from 'lucide-react';
 
-// Liste des tags (identique à celle de la modale publique)
-const predefinedTags = [
-  "Chatbot", "Copywriting", "Traduction", "Résumé", 
-  "Text-to-Image", "Text-to-Video", "Text-to-Speech", 
-  "Avatar", "Montage vidéo", "Édition photo", 
-  "Génération de code", "SQL", "API", "Automatisation", 
-  "Productivité", "Design UI/UX", "SEO", "Recherche"
+import React, { useState, useEffect, useMemo } from 'react';
+import { 
+  Search, Plus, Filter, Type, Image as ImageIcon, Video, 
+  Mic, PenTool, Code2, Megaphone, User, Settings, 
+  Scale, GraduationCap, BrainCircuit, MessageSquareCode, 
+  Database, Bot, ChevronRight, ChevronDown, ExternalLink, Loader2, X
+} from 'lucide-react';
+import SubmitToolModal from '../../components/SubmitToolModal';
+import AdBanner from '../../components/AdBanner';
+import { supabase } from '../../lib/supabase';
+import Link from 'next/link';
+import { useTranslations, useLocale } from 'next-intl';
+import { usePathname, useRouter } from 'next/navigation';
+
+// --- 1. DÉFINITION DES DONNÉES ---
+const categoriesUsage = [
+  { id: 1, slug: "texte", icon: Type },
+  { id: 2, slug: "image", icon: ImageIcon },
+  { id: 3, slug: "video", icon: Video },
+  { id: 4, slug: "audio", icon: Mic },
+  { id: 5, slug: "design", icon: PenTool }
 ];
 
-export default function AdminDashboard() {
-  const [tools, setTools] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(null);
-  const [errorMsg, setErrorMsg] = useState('');
+const categoriesMetier = [
+  { id: 6, slug: "code", icon: Code2 },
+  { id: 7, slug: "marketing", icon: Megaphone },
+  { id: 8, slug: "support", icon: User },
+  { id: 9, slug: "productivite", icon: Settings },
+  { id: 10, slug: "finance", icon: Scale },
+  { id: 11, slug: "education", icon: GraduationCap }
+];
+
+const categoriesTech = [
+  { id: 12, slug: "llm", icon: BrainCircuit },
+  { id: 13, slug: "prompt", icon: MessageSquareCode },
+  { id: 14, slug: "data", icon: Database },
+  { id: 15, slug: "agents", icon: Bot }
+];
+
+// --- 2. COMPOSANT CARTE ---
+const CategoryCard = ({ item, colorTheme, realCount }) => {
+  const Icon = item.icon;
+  const t = useTranslations('Categories');
+  const locale = useLocale(); 
   
-  const [activeTab, setActiveTab] = useState('pending'); 
+  const themes = {
+    purple: { text: "text-purple-300", icon: "text-purple-400", badge: "bg-purple-500/20 text-purple-300", hoverBorder: "hover:border-purple-500/50", marker: "marker:text-purple-500/50" },
+    cyan: { text: "text-cyan-300", icon: "text-cyan-400", badge: "bg-cyan-500/20 text-cyan-300", hoverBorder: "hover:border-cyan-500/50", marker: "marker:text-cyan-500/50" },
+    emerald: { text: "text-emerald-300", icon: "text-emerald-400", badge: "bg-emerald-500/20 text-emerald-300", hoverBorder: "hover:border-emerald-500/50", marker: "marker:text-emerald-500/50" }
+  };
+  
+  const theme = themes[colorTheme] || themes.purple;
 
-  // États pour la modale d'édition
-  const [editingTool, setEditingTool] = useState(null);
-  const [editFormData, setEditFormData] = useState({
-    name: '', url: '', description_fr: '', description_en: '', 
-    categories: [] as string[], 
-    tags: [] as string[], // <-- Ajout des tags ici
-    pricing: ''
-  });
-  const [isSaving, setIsSaving] = useState(false);
+  const descriptions = [
+    t(`${item.slug}.desc1`), 
+    t(`${item.slug}.desc2`), 
+    t(`${item.slug}.desc3`)
+  ].filter(Boolean); 
 
-  const fetchTools = async () => {
-    setIsLoading(true);
-    setErrorMsg('');
-    
-    const { data, error } = await supabase
-      .from('tools')
-      .select('*')
-      .eq('status', activeTab)
-      .order('created_at', { ascending: false });
+  return (
+    <Link href={`/${locale}/categorie/${item.slug}`} className="block">
+      <div className={`bg-[#1a1b23] border border-slate-700/50 rounded-xl p-4 transition-colors cursor-pointer group ${theme.hoverBorder}`}>
+        <div className="flex justify-between items-start gap-2 mb-2">
+          <div className="flex items-center gap-3 min-w-0"> 
+            <Icon className={`w-5 h-5 shrink-0 ${theme.icon}`} /> 
+            <h3 className={`font-semibold text-sm md:text-base leading-tight ${theme.text}`}>{t(`${item.slug}.title`)}</h3>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className={`text-xs py-1 px-2 rounded-full font-medium ${theme.badge}`}>
+              {realCount || 0}
+            </span>
+            <ChevronRight className={`w-4 h-4 text-slate-500 group-hover:${theme.text}`} />
+          </div>
+        </div>
+        <ul className={`text-xs text-slate-400 space-y-1 ml-6 list-disc ${theme.marker}`}>
+          {descriptions.map((line, index) => (
+            <li key={index} className="leading-relaxed">{line}</li>
+          ))}
+        </ul>
+      </div>
+    </Link>
+  );
+};
 
-    if (error) {
-      console.error(error);
-      setErrorMsg("Erreur de chargement. Vérifiez vos règles de sécurité (RLS).");
-    } else {
-      setTools(data || []);
-    }
-    setIsLoading(false);
+// --- 3. PAGE PRINCIPALE ---
+export default function AnnuaireDesktop() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const t = useTranslations();
+  const tFilters = useTranslations('Filters');
+  const locale = useLocale(); 
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  const [allTools, setAllTools] = useState([]);
+  const [counts, setCounts] = useState({});
+  const [isLoadingData, setIsLoadingData] = useState(true);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [priceFilters, setPriceFilters] = useState([]);
+  const [accessFilters, setAccessFilters] = useState([]);
+
+  const switchLanguage = (newLocale: string) => {
+    const newPath = pathname.replace(/^\/(fr|en)/, `/${newLocale}`);
+    router.push(newPath);
   };
 
   useEffect(() => {
-    fetchTools();
-  }, [activeTab]);
+    const fetchData = async () => {
+      const { data } = await supabase
+        .from('tools')
+        .select('*')
+        .eq('status', 'approved')
+        .in('language', [locale, 'both']) 
+        .order('created_at', { ascending: false });
 
-  const handleStatusUpdate = async (id, newStatus) => {
-    setActionLoading(id);
-    const { error } = await supabase
-      .from('tools')
-      .update({ status: newStatus })
-      .eq('id', id);
+      if (data) {
+        setAllTools(data);
+        
+        const calculatedCounts = {};
+        data.forEach(tool => {
+          if (tool.categories && Array.isArray(tool.categories)) {
+            tool.categories.forEach(cat => {
+              calculatedCounts[cat] = (calculatedCounts[cat] || 0) + 1;
+            });
+          }
+        });
+        setCounts(calculatedCounts);
+      }
+      setIsLoadingData(false);
+    };
 
-    if (error) {
-      alert("Erreur : " + error.message);
-    } else {
-      fetchTools();
-    }
-    setActionLoading(null);
-  };
+    fetchData();
+  }, [isModalOpen, locale]);
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Êtes-vous sûr de vouloir supprimer définitivement cet outil ?")) return;
-    
-    setActionLoading(id);
-    const { error } = await supabase.from('tools').delete().eq('id', id);
-
-    if (error) {
-      alert("Erreur : " + error.message);
-    } else {
-      fetchTools();
-    }
-    setActionLoading(null);
-  };
-
-  const openEditModal = (tool) => {
-    setEditingTool(tool);
-    setEditFormData({
-      name: tool.name || '',
-      url: tool.url || '',
-      description_fr: tool.description_fr || '',
-      description_en: tool.description_en || '',
-      categories: tool.categories || [],
-      tags: tool.tags || [], // <-- On récupère les tags existants
-      pricing: tool.pricing || 'Freemium'
+  const filteredTools = useMemo(() => {
+    return allTools.filter(tool => {
+      const descFr = tool.description_fr || "";
+      const descEn = tool.description_en || "";
+      const matchesSearch = tool.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            descFr.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            descEn.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesPrice = priceFilters.length === 0 || priceFilters.includes(tool.pricing);
+      return matchesSearch && matchesPrice;
     });
+  }, [allTools, priceFilters, searchQuery]);
+
+  const isSearching = searchQuery.length > 0 || priceFilters.length > 0;
+
+  const toggleFilter = (value, state, setState) => {
+    setState(prev => prev.includes(value) ? prev.filter(item => item !== value) : [...prev, value]);
   };
 
-  const handleEditChange = (e) => {
-    const { name, value } = e.target;
-    setEditFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleCategoryToggle = (slug: string) => {
-    setEditFormData(prev => {
-      const isSelected = prev.categories.includes(slug);
-      return {
-        ...prev,
-        categories: isSelected 
-          ? prev.categories.filter(c => c !== slug) 
-          : [...prev.categories, slug]
-      };
-    });
-  };
-
-  // <-- Nouvelle fonction pour gérer les tags dans l'Admin
-  const handleTagToggle = (tag: string) => {
-    setEditFormData(prev => {
-      const isSelected = prev.tags.includes(tag);
-      return {
-        ...prev,
-        tags: isSelected 
-          ? prev.tags.filter(t => t !== tag) 
-          : [...prev.tags, tag]
-      };
-    });
-  };
-
-  const handleSaveEdit = async (e) => {
-    e.preventDefault();
-    setIsSaving(true);
-
-    const { error } = await supabase
-      .from('tools')
-      .update({
-        name: editFormData.name,
-        url: editFormData.url,
-        description_fr: editFormData.description_fr,
-        description_en: editFormData.description_en,
-        categories: editFormData.categories,
-        tags: editFormData.tags, // <-- On sauvegarde les tags
-        pricing: editFormData.pricing
-      })
-      .eq('id', editingTool.id);
-
-    if (error) {
-      alert("Erreur : " + error.message);
-    } else {
-      setEditingTool(null);
-      fetchTools();
-    }
-    setIsSaving(false);
+  const resetFilters = () => {
+    setSearchQuery("");
+    setPriceFilters([]);
+    setAccessFilters([]);
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0c10] text-slate-200 font-sans p-6">
-      <div className="max-w-5xl mx-auto">
-        
-        <div className="flex items-center justify-between mb-8 border-b border-slate-800 pb-6">
+    <div className="min-h-screen bg-[#0b0c10] text-slate-200 font-sans selection:bg-purple-500/30">
+      
+      <header className="flex flex-col lg:flex-row items-center justify-between p-4 border-b border-slate-800 sticky top-0 bg-[#0b0c10]/90 backdrop-blur-md z-50 gap-4">
+        <div className="flex items-center gap-3 w-full lg:w-auto">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-600 to-cyan-400 flex items-center justify-center shrink-0">
+            <BrainCircuit className="text-white w-6 h-6" />
+          </div>
           <div>
-            <Link href="/" className="text-sm text-slate-400 hover:text-white flex items-center gap-2 mb-2 transition-colors">
-              <ArrowLeft className="w-4 h-4" /> Retour au site
-            </Link>
-            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-              <Clock className="w-8 h-8 text-purple-500" />
-              Gestion des outils
+            <h1 className="text-xl lg:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+              {t('Header.title')}
             </h1>
+            <p className="text-xs text-slate-400 hidden sm:block">{t('Header.subtitle')}</p>
           </div>
         </div>
 
-        {/* ONGLETS DE NAVIGATION */}
-        <div className="flex space-x-2 mb-6 bg-[#13141b] p-1 rounded-lg w-fit border border-slate-800">
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+          <div className="flex gap-2 mr-2">
+            <button onClick={() => switchLanguage('fr')} className={`text-sm font-bold transition-colors ${pathname.startsWith('/fr') ? 'text-purple-400' : 'text-slate-400 hover:text-white'}`}>FR</button>
+            <span className="text-slate-600">|</span>
+            <button onClick={() => switchLanguage('en')} className={`text-sm font-bold transition-colors ${pathname.startsWith('/en') ? 'text-purple-400' : 'text-slate-400 hover:text-white'}`}>EN</button>
+          </div>
+
+          <div className="relative w-full lg:w-96">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+            <input 
+              type="text" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t('Header.searchPlaceholder')} 
+              className="w-full bg-[#13141b] border border-slate-700 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-cyan-500 transition-colors" 
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
           <button 
-            onClick={() => setActiveTab('pending')}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'pending' ? 'bg-slate-800 text-white shadow' : 'text-slate-400 hover:text-white'}`}
+            onClick={() => setIsModalOpen(true)}
+            className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-medium py-2 px-6 rounded-full flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(168,85,247,0.4)]"
           >
-            En attente
-          </button>
-          <button 
-            onClick={() => setActiveTab('approved')}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'approved' ? 'bg-slate-800 text-emerald-400 shadow' : 'text-slate-400 hover:text-white'}`}
-          >
-            Approuvés
-          </button>
-          <button 
-            onClick={() => setActiveTab('rejected')}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'rejected' ? 'bg-slate-800 text-red-400 shadow' : 'text-slate-400 hover:text-white'}`}
-          >
-            Refusés
+            <Plus className="w-5 h-5" />
+            {t('Header.submitButton')}
           </button>
         </div>
+      </header>
 
-        {errorMsg && (
-          <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-4 rounded-lg mb-6">
-            {errorMsg}
-          </div>
-        )}
-
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <Loader2 className="w-10 h-10 text-purple-500 animate-spin mb-4" />
-            <p className="text-slate-400">Chargement...</p>
-          </div>
-        ) : tools.length === 0 ? (
-          <div className="bg-[#13141b] border border-slate-800 rounded-2xl p-12 text-center flex flex-col items-center">
-            <CheckCircle className="w-16 h-16 text-slate-600 mb-4" />
-            <h2 className="text-xl font-bold text-white mb-2">Aucun outil ici</h2>
-            <p className="text-slate-400">Il n'y a pas d'outil dans cette catégorie pour le moment.</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {tools.map((tool) => (
-              <div key={tool.id} className="bg-[#13141b] border border-slate-700 rounded-xl p-5 flex flex-col md:flex-row md:items-start justify-between gap-6">
-                
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2 flex-wrap">
-                    <h3 className="text-xl font-bold text-white">{tool.name}</h3>
-                    <span className="text-xs bg-slate-800 text-slate-300 py-1 px-2 rounded border border-slate-700">
-                      {tool.pricing}
-                    </span>
-                    <div className="flex gap-1 flex-wrap">
-                      {tool.categories && tool.categories.map(cat => (
-                        <span key={cat} className="text-xs bg-purple-500/20 text-purple-300 py-1 px-2 rounded border border-purple-500/30">
-                          {cat}
-                        </span>
-                      ))}
-                      {tool.tags && tool.tags.map(tag => (
-                        <span key={tag} className="text-xs bg-cyan-500/10 text-cyan-400 py-1 px-2 rounded border border-cyan-500/20">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="text-sm text-slate-400 mb-4 space-y-1 bg-[#0b0c10] p-3 rounded-lg border border-slate-800">
-                    {tool.description_fr && <p><strong className="text-slate-300">FR :</strong> {tool.description_fr}</p>}
-                    {tool.description_en && <p><strong className="text-slate-300">EN :</strong> {tool.description_en}</p>}
-                  </div>
-                  
-                  <div className="flex items-center gap-4 text-xs">
-                    <a href={tool.url} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-300 flex items-center gap-1">
-                      Visiter le site <ExternalLink className="w-3 h-3" />
-                    </a>
-                    <span className="text-slate-500">Proposé par : {tool.contributor || "Anonyme"}</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <button 
-                    onClick={() => openEditModal(tool)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors text-sm"
-                  >
-                    <Pencil className="w-4 h-4" /> Éditer
-                  </button>
-                  <button 
-                    onClick={() => handleDelete(tool.id)}
-                    disabled={actionLoading === tool.id}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-800 text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50 text-sm"
-                  >
-                    {actionLoading === tool.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                  </button>
-
-                  {activeTab === 'pending' && (
-                    <>
-                      <button 
-                        onClick={() => handleStatusUpdate(tool.id, 'rejected')}
-                        disabled={actionLoading === tool.id}
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-colors disabled:opacity-50 text-sm"
-                      >
-                        <XCircle className="w-4 h-4" /> Refuser
-                      </button>
-                      <button 
-                        onClick={() => handleStatusUpdate(tool.id, 'approved')}
-                        disabled={actionLoading === tool.id}
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30 transition-colors disabled:opacity-50 text-sm"
-                      >
-                        <CheckCircle className="w-4 h-4" /> Approuver
-                      </button>
-                    </>
-                  )}
-                  
-                  {activeTab === 'approved' && (
-                    <button 
-                      onClick={() => handleStatusUpdate(tool.id, 'pending')}
-                      className="flex items-center gap-2 px-3 py-2 rounded-lg bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 border border-yellow-500/20 transition-colors text-sm"
-                    >
-                      Mettre en attente
-                    </button>
-                  )}
-                </div>
-
+      <main className="max-w-[1600px] mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20">
+        
+        <aside className="hidden lg:block lg:col-span-3 space-y-6">
+          <div className="bg-[#13141b] border border-slate-800 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-4 text-cyan-400">
+              <div className="flex items-center gap-2">
+                <Filter className="w-5 h-5" />
+                <h2 className="font-semibold text-lg">{tFilters('title')}</h2>
               </div>
-            ))}
-          </div>
-        )}
-
-        {/* MODALE D'ÉDITION */}
-        {editingTool && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setEditingTool(null)}></div>
-            <div className="relative bg-[#13141b] border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-              <div className="flex items-center justify-between p-6 border-b border-slate-800">
-                <h2 className="text-xl font-bold text-white">Éditer : {editingTool.name}</h2>
-                <button onClick={() => setEditingTool(null)} className="text-slate-400 hover:text-white"><X className="w-5 h-5" /></button>
-              </div>
-              <div className="p-6 overflow-y-auto custom-scrollbar">
-                <form id="edit-form" onSubmit={handleSaveEdit} className="space-y-5">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1.5">Nom de l'outil</label>
-                      <input required type="text" name="name" value={editFormData.name} onChange={handleEditChange} className="w-full bg-[#0b0c10] border border-slate-700 rounded-lg py-2 px-4 text-sm text-white" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1.5">URL</label>
-                      <input required type="url" name="url" value={editFormData.url} onChange={handleEditChange} className="w-full bg-[#0b0c10] border border-slate-700 rounded-lg py-2 px-4 text-sm text-white" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1.5">Description (FR)</label>
-                      <input type="text" name="description_fr" value={editFormData.description_fr} onChange={handleEditChange} className="w-full bg-[#0b0c10] border border-slate-700 rounded-lg py-2 px-4 text-sm text-white" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1.5">Description (EN)</label>
-                      <input type="text" name="description_en" value={editFormData.description_en} onChange={handleEditChange} className="w-full bg-[#0b0c10] border border-slate-700 rounded-lg py-2 px-4 text-sm text-white" />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">Catégories</label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      {['texte', 'image', 'video', 'audio', 'design', 'code', 'marketing', 'support', 'productivite', 'finance', 'education', 'llm', 'prompt', 'data', 'agents'].map((cat) => (
-                        <label key={cat} className={`flex items-center gap-2 p-2 rounded border cursor-pointer ${editFormData.categories.includes(cat) ? 'border-purple-500 bg-purple-500/10' : 'border-slate-700'}`}>
-                          <input type="checkbox" checked={editFormData.categories.includes(cat)} onChange={() => handleCategoryToggle(cat)} className="w-4 h-4 rounded bg-slate-800 text-purple-500" />
-                          <span className="text-sm capitalize">{cat}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* <-- NOUVELLE SECTION TAGS DANS L'ADMIN --> */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">Tags</label>
-                    <div className="flex flex-wrap gap-2">
-                      {predefinedTags.map((tag) => (
-                        <label key={tag} className={`cursor-pointer px-3 py-1 rounded-full text-xs font-medium border transition-colors ${editFormData.tags.includes(tag) ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300' : 'bg-[#0b0c10] border-slate-700 text-slate-400 hover:border-slate-500'}`}>
-                          <input type="checkbox" className="hidden" checked={editFormData.tags.includes(tag)} onChange={() => handleTagToggle(tag)} />
-                          {tag}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">Prix</label>
-                    <select name="pricing" value={editFormData.pricing} onChange={handleEditChange} className="w-full bg-[#0b0c10] border border-slate-700 rounded-lg py-2 px-4 text-sm text-white">
-                      <option value="Gratuit">Gratuit</option>
-                      <option value="Freemium">Freemium</option>
-                      <option value="Payant">Payant</option>
-                      <option value="Open Source">Open Source</option>
-                    </select>
-                  </div>
-                </form>
-              </div>
-              <div className="p-6 border-t border-slate-800 flex justify-end gap-3">
-                <button onClick={() => setEditingTool(null)} className="px-4 py-2 text-sm text-slate-300 hover:text-white">Annuler</button>
-                <button type="submit" form="edit-form" disabled={isSaving} className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2 rounded-lg flex items-center gap-2">
-                  {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Enregistrer"}
+              {(priceFilters.length > 0 || searchQuery) && (
+                <button onClick={resetFilters} className="text-xs text-slate-400 hover:text-white border border-slate-700 px-2 py-1 rounded">
+                  Reset
                 </button>
+              )}
+            </div>
+            <p className="text-xs text-slate-400 mb-6">{tFilters('subtitle')}</p>
+
+            <div className="mb-6">
+              <div className="flex items-center justify-between cursor-pointer mb-3">
+                <h3 className="font-medium text-sm text-slate-200">{tFilters('price')}</h3>
+                <ChevronDown className="w-4 h-4 text-slate-400" />
+              </div>
+              <div className="space-y-2">
+                {[
+                  { value: 'Gratuit', label: tFilters('prices.free') },
+                  { value: 'Freemium', label: tFilters('prices.freemium') },
+                  { value: 'Payant', label: tFilters('prices.paid') },
+                  { value: 'Open Source', label: tFilters('prices.openSource') }
+                ].map((item) => (
+                  <label key={item.value} className="flex items-center gap-3 cursor-pointer group">
+                    <input 
+                      type="checkbox" 
+                      checked={priceFilters.includes(item.value)}
+                      onChange={() => toggleFilter(item.value, priceFilters, setPriceFilters)}
+                      className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-purple-500 focus:ring-purple-500/20" 
+                    />
+                    <span className="text-sm text-slate-300 group-hover:text-white transition-colors">{item.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            
+            <div>
+              <div className="flex items-center justify-between cursor-pointer mb-3">
+                <h3 className="font-medium text-sm text-slate-200">{tFilters('access')}</h3>
+                <ChevronDown className="w-4 h-4 text-slate-400" />
+              </div>
+              <div className="space-y-2 opacity-50 pointer-events-none">
+                {['Web App', 'API', 'Extension Chrome', 'Desktop/Mobile'].map((item) => (
+                  <label key={item} className="flex items-center gap-3 cursor-pointer group">
+                    <input type="checkbox" className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-purple-500" />
+                    <span className="text-sm text-slate-300">{item}</span>
+                  </label>
+                ))}
               </div>
             </div>
           </div>
-        )}
+          <AdBanner />
+        </aside>
 
-      </div>
+        <div className="col-span-1 lg:col-span-9">
+          
+          {isSearching ? (
+            <div>
+              <h2 className="text-xl font-bold text-white mb-6">
+                {filteredTools.length} résultat(s) trouvé(s)
+              </h2>
+              {filteredTools.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredTools.map(tool => (
+                    <div key={tool.id} className="bg-[#13141b] border border-slate-700/50 rounded-xl p-5 hover:border-purple-500/50 transition-colors flex flex-col justify-between">
+                      <div>
+                        <div className="flex justify-between items-start mb-3 gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center border border-slate-700 overflow-hidden shrink-0 relative">
+                              <span className="font-bold text-lg text-purple-400 absolute">{tool.name.charAt(0)}</span>
+                              <img 
+                                src={`https://logo.clearbit.com/${new URL(tool.url).hostname}`} 
+                                alt={tool.name}
+                                className="w-full h-full object-cover relative z-10 bg-[#13141b]"
+                                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                              />
+                            </div>
+                            <h3 className="font-bold text-lg text-white leading-tight truncate">{tool.name}</h3>
+                          </div>
+                          <span className="text-xs bg-slate-800 text-slate-300 py-1 px-2 rounded border border-slate-700 shrink-0">{tool.pricing}</span>
+                        </div>
+                        <p className="text-sm text-slate-400 mb-2 line-clamp-2">
+                          {locale === 'fr' ? (tool.description_fr || tool.description_en) : (tool.description_en || tool.description_fr)}
+                        </p>
+                        
+                        {tool.tags && tool.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mb-4">
+                            {tool.tags.map(tag => (
+                              <span key={tag} className="text-[10px] bg-slate-800 text-cyan-400 px-2 py-0.5 rounded border border-slate-700">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <a href={tool.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-cyan-400 hover:text-cyan-300 flex items-center gap-1 w-fit mt-2">
+                        {t('Recent.visit')} <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-20 text-center bg-[#13141b] border border-slate-800 rounded-2xl">
+                  <p className="text-slate-400">Aucun outil ne correspond à votre recherche.</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="bg-[#13141b] border border-slate-800 rounded-2xl p-5 shadow-lg h-fit">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-purple-500/20 rounded-lg shrink-0"><ImageIcon className="w-6 h-6 text-purple-400" /></div>
+                    <h2 className="text-lg lg:text-xl font-bold text-white leading-tight">{t('Categories.usageTitle')}<br/><span className="text-sm text-purple-400 font-normal">{t('Categories.usageSubtitle')}</span></h2>
+                  </div>
+                  <div className="space-y-3">
+                    {categoriesUsage.map(item => <CategoryCard key={item.id} item={item} colorTheme="purple" realCount={counts[item.slug]} />)}
+                  </div>
+                </div>
+
+                <div className="bg-[#13141b] border border-slate-800 rounded-2xl p-5 shadow-lg h-fit">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-cyan-500/20 rounded-lg shrink-0"><Settings className="w-6 h-6 text-cyan-400" /></div>
+                    <h2 className="text-lg lg:text-xl font-bold text-white leading-tight">{t('Categories.metierTitle')}</h2>
+                  </div>
+                  <div className="space-y-3">
+                    {categoriesMetier.map(item => <CategoryCard key={item.id} item={item} colorTheme="cyan" realCount={counts[item.slug]} />)}
+                  </div>
+                </div>
+
+                <div className="bg-[#13141b] border border-slate-800 rounded-2xl p-5 shadow-lg h-fit">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-emerald-500/20 rounded-lg shrink-0"><Database className="w-6 h-6 text-emerald-400" /></div>
+                    <h2 className="text-lg lg:text-xl font-bold text-white leading-tight">{t('Categories.techTitle')}</h2>
+                  </div>
+                  <div className="space-y-3">
+                    {categoriesTech.map(item => <CategoryCard key={item.id} item={item} colorTheme="emerald" realCount={counts[item.slug]} />)}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-12">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="h-px bg-slate-800 flex-1"></div>
+                  <h2 className="text-xl font-bold text-white flex items-center gap-2 text-center">{t('Recent.title')}</h2>
+                  <div className="h-px bg-slate-800 flex-1"></div>
+                </div>
+                {isLoadingData ? (
+                  <div className="flex justify-center py-10"><Loader2 className="w-8 h-8 text-purple-500 animate-spin" /></div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {allTools.slice(0, 3).map(tool => (
+                      <div key={tool.id} className="bg-[#13141b] border border-slate-700/50 rounded-xl p-5 hover:border-purple-500/50 transition-colors flex flex-col justify-between">
+                        <div>
+                          <div className="flex justify-between items-start mb-3 gap-3">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center border border-slate-700 overflow-hidden shrink-0 relative">
+                                <span className="font-bold text-lg text-purple-400 absolute">{tool.name.charAt(0)}</span>
+                                <img src={`https://logo.clearbit.com/${new URL(tool.url).hostname}`} alt={tool.name} className="w-full h-full object-cover relative z-10 bg-[#13141b]" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                              </div>
+                              <h3 className="font-bold text-lg text-white leading-tight truncate">{tool.name}</h3>
+                            </div>
+                            <span className="text-xs bg-slate-800 text-slate-300 py-1 px-2 rounded border border-slate-700 shrink-0">{tool.pricing}</span>
+                          </div>
+                          <p className="text-sm text-slate-400 mb-2 line-clamp-2">{locale === 'fr' ? (tool.description_fr || tool.description_en) : (tool.description_en || tool.description_fr)}</p>
+                          
+                          {tool.tags && tool.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mb-4">
+                              {tool.tags.map(tag => (
+                                <span key={tag} className="text-[10px] bg-slate-800 text-cyan-400 px-2 py-0.5 rounded border border-slate-700">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <a href={tool.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-cyan-400 hover:text-cyan-300 flex items-center gap-1 w-fit mt-2">{t('Recent.visit')} <ExternalLink className="w-3 h-3" /></a>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </main>
+
+      <SubmitToolModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );
 }
