@@ -1,18 +1,19 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Search, Plus, Filter, Type, Image as ImageIcon, Video, 
   Mic, PenTool, Code2, Megaphone, User, Settings, 
   Scale, GraduationCap, BrainCircuit, MessageSquareCode, 
-  Database, Bot, ChevronRight, ChevronDown, ExternalLink, Loader2
+  Database, Bot, ChevronRight, ChevronDown, ExternalLink, Loader2, X
 } from 'lucide-react';
 import SubmitToolModal from '../../components/SubmitToolModal';
+import AdBanner from '../../components/AdBanner';
 import { supabase } from '../../lib/supabase';
 import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
-import AdBanner from '../../components/AdBanner';
+
 // --- 1. DÉFINITION DES DONNÉES ---
 const categoriesUsage = [
   { id: 1, slug: "texte", icon: Type },
@@ -88,23 +89,30 @@ export default function AnnuaireDesktop() {
   const router = useRouter();
   const pathname = usePathname();
   const t = useTranslations();
-  const locale = useLocale(); // <-- On récupère la langue actuelle
+  const tFilters = useTranslations('Filters');
+  const locale = useLocale(); 
   
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Données globales
+  const [allTools, setAllTools] = useState([]);
   const [counts, setCounts] = useState({});
-  const [recentTools, setRecentTools] = useState([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
+
+  // États des filtres (Maintenant connectés !)
+  const [searchQuery, setSearchQuery] = useState("");
+  const [priceFilters, setPriceFilters] = useState([]);
+  const [accessFilters, setAccessFilters] = useState([]); // Pas encore de colonne access dans la BDD, mais prêt
 
   const switchLanguage = (newLocale: string) => {
     const newPath = pathname.replace(/^\/(fr|en)/, `/${newLocale}`);
     router.push(newPath);
   };
 
-  // --- RÉCUPÉRATION SUPABASE ---
+  // Récupération Supabase
   useEffect(() => {
     const fetchData = async () => {
-      // On filtre par langue (locale actuelle ou 'both')
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('tools')
         .select('*')
         .eq('status', 'approved')
@@ -112,26 +120,52 @@ export default function AnnuaireDesktop() {
         .order('created_at', { ascending: false });
 
       if (data) {
-        const calculatedCounts = {};
+        setAllTools(data);
         
-        // On boucle sur chaque outil
+        const calculatedCounts = {};
         data.forEach(tool => {
-          // On vérifie si l'outil a des catégories (tableau)
           if (tool.categories && Array.isArray(tool.categories)) {
             tool.categories.forEach(cat => {
               calculatedCounts[cat] = (calculatedCounts[cat] || 0) + 1;
             });
           }
         });
-        
         setCounts(calculatedCounts);
-        setRecentTools(data.slice(0, 3));
       }
       setIsLoadingData(false);
     };
 
     fetchData();
-  }, [isModalOpen, locale]); // Ajout de locale dans les dépendances
+  }, [isModalOpen, locale]);
+
+  // Logique de filtrage (Recherche + Prix)
+  const filteredTools = useMemo(() => {
+    return allTools.filter(tool => {
+      const descFr = tool.description_fr || "";
+      const descEn = tool.description_en || "";
+      
+      const matchesSearch = tool.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            descFr.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            descEn.toLowerCase().includes(searchQuery.toLowerCase());
+                            
+      const matchesPrice = priceFilters.length === 0 || priceFilters.includes(tool.pricing);
+      
+      return matchesSearch && matchesPrice;
+    });
+  }, [allTools, priceFilters, searchQuery]);
+
+  // Savoir si on doit afficher les catégories ou les résultats
+  const isSearching = searchQuery.length > 0 || priceFilters.length > 0;
+
+  const toggleFilter = (value, state, setState) => {
+    setState(prev => prev.includes(value) ? prev.filter(item => item !== value) : [...prev, value]);
+  };
+
+  const resetFilters = () => {
+    setSearchQuery("");
+    setPriceFilters([]);
+    setAccessFilters([]);
+  };
 
   return (
     <div className="min-h-screen bg-[#0b0c10] text-slate-200 font-sans selection:bg-purple-500/30">
@@ -153,7 +187,6 @@ export default function AnnuaireDesktop() {
 
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
           
-          {/* SÉLECTEUR DE LANGUE */}
           <div className="flex gap-2 mr-2">
             <button onClick={() => switchLanguage('fr')} className={`text-sm font-bold transition-colors ${pathname.startsWith('/fr') ? 'text-purple-400' : 'text-slate-400 hover:text-white'}`}>FR</button>
             <span className="text-slate-600">|</span>
@@ -164,9 +197,16 @@ export default function AnnuaireDesktop() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
             <input 
               type="text" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t('Header.searchPlaceholder')} 
               className="w-full bg-[#13141b] border border-slate-700 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-cyan-500 transition-colors" 
             />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
           <button 
             onClick={() => setIsModalOpen(true)}
@@ -184,175 +224,181 @@ export default function AnnuaireDesktop() {
         {/* SIDEBAR FILTRES */}
         <aside className="hidden lg:block lg:col-span-3 space-y-6">
           <div className="bg-[#13141b] border border-slate-800 rounded-2xl p-5">
-            <div className="flex items-center gap-2 mb-4 text-cyan-400">
-              <Filter className="w-5 h-5" />
-              <h2 className="font-semibold text-lg">{t('Filters.title')}</h2>
+            <div className="flex items-center justify-between mb-4 text-cyan-400">
+              <div className="flex items-center gap-2">
+                <Filter className="w-5 h-5" />
+                <h2 className="font-semibold text-lg">{tFilters('title')}</h2>
+              </div>
+              {(priceFilters.length > 0 || searchQuery) && (
+                <button onClick={resetFilters} className="text-xs text-slate-400 hover:text-white border border-slate-700 px-2 py-1 rounded">
+                  Reset
+                </button>
+              )}
             </div>
-            <p className="text-xs text-slate-400 mb-6">{t('Filters.subtitle')}</p>
+            <p className="text-xs text-slate-400 mb-6">{tFilters('subtitle')}</p>
 
-            {/* FILTRE PRIX */}
+            {/* FILTRE PRIX (Connecté) */}
             <div className="mb-6">
               <div className="flex items-center justify-between cursor-pointer mb-3">
-                <h3 className="font-medium text-sm text-slate-200">{t('Filters.price')}</h3>
+                <h3 className="font-medium text-sm text-slate-200">{tFilters('price')}</h3>
                 <ChevronDown className="w-4 h-4 text-slate-400" />
               </div>
               <div className="space-y-2">
                 {[
-                  { value: 'Gratuit', label: t('Filters.prices.free') },
-                  { value: 'Freemium', label: t('Filters.prices.freemium') },
-                  { value: 'Payant', label: t('Filters.prices.paid') },
-                  { value: 'Essai gratuit', label: t('Filters.prices.trial') },
-                  { value: 'Open Source', label: t('Filters.prices.openSource') }
+                  { value: 'Gratuit', label: tFilters('prices.free') },
+                  { value: 'Freemium', label: tFilters('prices.freemium') },
+                  { value: 'Payant', label: tFilters('prices.paid') },
+                  { value: 'Open Source', label: tFilters('prices.openSource') }
                 ].map((item) => (
                   <label key={item.value} className="flex items-center gap-3 cursor-pointer group">
-                    <input type="checkbox" className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-purple-500 focus:ring-purple-500/20" />
+                    <input 
+                      type="checkbox" 
+                      checked={priceFilters.includes(item.value)}
+                      onChange={() => toggleFilter(item.value, priceFilters, setPriceFilters)}
+                      className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-purple-500 focus:ring-purple-500/20" 
+                    />
                     <span className="text-sm text-slate-300 group-hover:text-white transition-colors">{item.label}</span>
                   </label>
                 ))}
               </div>
             </div>
             
-            {/* FILTRE ACCÈS */}
+            {/* FILTRE ACCÈS (Visuel pour l'instant) */}
             <div>
               <div className="flex items-center justify-between cursor-pointer mb-3">
-                <h3 className="font-medium text-sm text-slate-200">{t('Filters.access')}</h3>
+                <h3 className="font-medium text-sm text-slate-200">{tFilters('access')}</h3>
                 <ChevronDown className="w-4 h-4 text-slate-400" />
               </div>
-              <div className="space-y-2">
-                {[
-                  { value: 'Extension Chrome', label: t('Filters.accessTypes.chrome') },
-                  { value: 'Web App', label: t('Filters.accessTypes.web') },
-                  { value: 'API', label: t('Filters.accessTypes.api') },
-                  { value: 'Application Desktop/Mobile', label: t('Filters.accessTypes.desktop') }
-                ].map((item) => (
-                  <label key={item.value} className="flex items-center gap-3 cursor-pointer group">
-                    <input type="checkbox" className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-purple-500 focus:ring-purple-500/20" />
-                    <span className="text-sm text-slate-300 group-hover:text-white transition-colors">{item.label}</span>
+              <div className="space-y-2 opacity-50 pointer-events-none" title="Bientôt disponible">
+                {['Web App', 'API', 'Extension Chrome', 'Desktop/Mobile'].map((item) => (
+                  <label key={item} className="flex items-center gap-3 cursor-pointer group">
+                    <input type="checkbox" className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-purple-500" />
+                    <span className="text-sm text-slate-300">{item}</span>
                   </label>
                 ))}
               </div>
             </div>
           </div>
-
-          {/* 👇 AJOUTEZ LA BANNIÈRE ICI 👇 */}
           <AdBanner />
-          
         </aside>
 
-        {/* COLONNES PRINCIPALES */}
-        <div className="col-span-1 lg:col-span-9 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* CONTENU PRINCIPAL */}
+        <div className="col-span-1 lg:col-span-9">
           
-          {/* COLONNE 1 */}
-          <div className="bg-[#13141b] border border-slate-800 rounded-2xl p-5 shadow-lg h-fit">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-purple-500/20 rounded-lg shrink-0">
-                <ImageIcon className="w-6 h-6 text-purple-400" />
-              </div>
-              <h2 className="text-lg lg:text-xl font-bold text-white leading-tight">
-                {t('Categories.usageTitle')}<br/>
-                <span className="text-sm text-purple-400 font-normal">{t('Categories.usageSubtitle')}</span>
+          {/* SI ON CHERCHE OU FILTRE, ON AFFICHE LES RÉSULTATS */}
+          {isSearching ? (
+            <div>
+              <h2 className="text-xl font-bold text-white mb-6">
+                {filteredTools.length} résultat(s) trouvé(s)
               </h2>
-            </div>
-            <div className="space-y-3">
-              {categoriesUsage.map(item => (
-                <CategoryCard key={item.id} item={item} colorTheme="purple" realCount={counts[item.slug]} />
-              ))}
-            </div>
-          </div>
-
-          {/* COLONNE 2 */}
-          <div className="bg-[#13141b] border border-slate-800 rounded-2xl p-5 shadow-lg h-fit">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-cyan-500/20 rounded-lg shrink-0">
-                <Settings className="w-6 h-6 text-cyan-400" />
-              </div>
-              <h2 className="text-lg lg:text-xl font-bold text-white leading-tight">{t('Categories.metierTitle')}</h2>
-            </div>
-            <div className="space-y-3">
-              {categoriesMetier.map(item => (
-                <CategoryCard key={item.id} item={item} colorTheme="cyan" realCount={counts[item.slug]} />
-              ))}
-            </div>
-          </div>
-
-          {/* COLONNE 3 */}
-          <div className="bg-[#13141b] border border-slate-800 rounded-2xl p-5 shadow-lg h-fit">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-emerald-500/20 rounded-lg shrink-0">
-                <Database className="w-6 h-6 text-emerald-400" />
-              </div>
-              <h2 className="text-lg lg:text-xl font-bold text-white leading-tight">{t('Categories.techTitle')}</h2>
-            </div>
-            <div className="space-y-3">
-              {categoriesTech.map(item => (
-                <CategoryCard key={item.id} item={item} colorTheme="emerald" realCount={counts[item.slug]} />
-              ))}
-            </div>
-          </div>
-
-        </div>
-
-
-        {/* DERNIERS AJOUTS */}
-        <div className="col-span-1 lg:col-span-12 mt-10">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="h-px bg-slate-800 flex-1"></div>
-            <h2 className="text-xl font-bold text-white flex items-center gap-2 text-center">
-              {t('Recent.title')}
-            </h2>
-            <div className="h-px bg-slate-800 flex-1"></div>
-          </div>
-
-          {isLoadingData ? (
-            <div className="flex justify-center py-10"><Loader2 className="w-8 h-8 text-purple-500 animate-spin" /></div>
-          ) : recentTools.length === 0 ? (
-            <p className="text-center text-slate-500 py-10">{t('Recent.noTools')}</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {recentTools.map(tool => (
-                <div key={tool.id} className="bg-[#13141b] border border-slate-700/50 rounded-xl p-5 hover:border-purple-500/50 transition-colors flex flex-col justify-between">
-                  <div>
-                    {/* EN-TÊTE DE LA CARTE : Logo + Titre + Prix */}
-                    <div className="flex justify-between items-start mb-3 gap-3">
-                      
-                      {/* Logo + Titre */}
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center border border-slate-700 overflow-hidden shrink-0">
-                          <img 
-                            src={`https://logo.clearbit.com/${new URL(tool.url).hostname}`} 
-                            alt={tool.name}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                              e.currentTarget.parentElement!.innerHTML = `<span class="font-bold text-lg text-purple-400">${tool.name.charAt(0)}</span>`;
-                            }}
-                          />
+              {filteredTools.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredTools.map(tool => (
+                    <div key={tool.id} className="bg-[#13141b] border border-slate-700/50 rounded-xl p-5 hover:border-purple-500/50 transition-colors flex flex-col justify-between">
+                      <div>
+                        <div className="flex justify-between items-start mb-3 gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center border border-slate-700 overflow-hidden shrink-0">
+                              <img 
+                                src={`https://logo.clearbit.com/${new URL(tool.url).hostname}`} 
+                                alt={tool.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                  e.currentTarget.parentElement!.innerHTML = `<span class="font-bold text-lg text-purple-400">${tool.name.charAt(0)}</span>`;
+                                }}
+                              />
+                            </div>
+                            <h3 className="font-bold text-lg text-white leading-tight truncate">{tool.name}</h3>
+                          </div>
+                          <span className="text-xs bg-slate-800 text-slate-300 py-1 px-2 rounded border border-slate-700 shrink-0">{tool.pricing}</span>
                         </div>
-                        <h3 className="font-bold text-lg text-white leading-tight truncate">{tool.name}</h3>
+                        <p className="text-sm text-slate-400 mb-4 line-clamp-2">
+                          {locale === 'fr' ? (tool.description_fr || tool.description_en) : (tool.description_en || tool.description_fr)}
+                        </p>
                       </div>
-
-                      {/* Badge Prix */}
-                      <span className="text-xs bg-slate-800 text-slate-300 py-1 px-2 rounded border border-slate-700 shrink-0">{tool.pricing}</span>
+                      <a href={tool.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-cyan-400 hover:text-cyan-300 flex items-center gap-1 w-fit mt-2">
+                        {t('Recent.visit')} <ExternalLink className="w-3 h-3" />
+                      </a>
                     </div>
-
-                    {/* Description */}
-                    <p className="text-sm text-slate-400 mb-4 line-clamp-2">
-                      {locale === 'fr' 
-                        ? (tool.description_fr || tool.description_en) 
-                        : (tool.description_en || tool.description_fr)}
-                    </p>
-                  </div>
-                  
-                  {/* Lien Visiter */}
-                  <a href={tool.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-cyan-400 hover:text-cyan-300 flex items-center gap-1 w-fit mt-2">
-                    {t('Recent.visit')} <ExternalLink className="w-3 h-3" />
-                  </a>
+                  ))}
                 </div>
-              ))}
+              ) : (
+                <div className="py-20 text-center bg-[#13141b] border border-slate-800 rounded-2xl">
+                  <p className="text-slate-400">Aucun outil ne correspond à votre recherche.</p>
+                </div>
+              )}
             </div>
+          ) : (
+            
+            /* SINON, ON AFFICHE LES CATÉGORIES COMME AVANT */
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="bg-[#13141b] border border-slate-800 rounded-2xl p-5 shadow-lg h-fit">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-purple-500/20 rounded-lg shrink-0"><ImageIcon className="w-6 h-6 text-purple-400" /></div>
+                    <h2 className="text-lg lg:text-xl font-bold text-white leading-tight">{t('Categories.usageTitle')}<br/><span className="text-sm text-purple-400 font-normal">{t('Categories.usageSubtitle')}</span></h2>
+                  </div>
+                  <div className="space-y-3">
+                    {categoriesUsage.map(item => <CategoryCard key={item.id} item={item} colorTheme="purple" realCount={counts[item.slug]} />)}
+                  </div>
+                </div>
+
+                <div className="bg-[#13141b] border border-slate-800 rounded-2xl p-5 shadow-lg h-fit">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-cyan-500/20 rounded-lg shrink-0"><Settings className="w-6 h-6 text-cyan-400" /></div>
+                    <h2 className="text-lg lg:text-xl font-bold text-white leading-tight">{t('Categories.metierTitle')}</h2>
+                  </div>
+                  <div className="space-y-3">
+                    {categoriesMetier.map(item => <CategoryCard key={item.id} item={item} colorTheme="cyan" realCount={counts[item.slug]} />)}
+                  </div>
+                </div>
+
+                <div className="bg-[#13141b] border border-slate-800 rounded-2xl p-5 shadow-lg h-fit">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-emerald-500/20 rounded-lg shrink-0"><Database className="w-6 h-6 text-emerald-400" /></div>
+                    <h2 className="text-lg lg:text-xl font-bold text-white leading-tight">{t('Categories.techTitle')}</h2>
+                  </div>
+                  <div className="space-y-3">
+                    {categoriesTech.map(item => <CategoryCard key={item.id} item={item} colorTheme="emerald" realCount={counts[item.slug]} />)}
+                  </div>
+                </div>
+              </div>
+
+              {/* DERNIERS AJOUTS */}
+              <div className="mt-12">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="h-px bg-slate-800 flex-1"></div>
+                  <h2 className="text-xl font-bold text-white flex items-center gap-2 text-center">{t('Recent.title')}</h2>
+                  <div className="h-px bg-slate-800 flex-1"></div>
+                </div>
+                {isLoadingData ? (
+                  <div className="flex justify-center py-10"><Loader2 className="w-8 h-8 text-purple-500 animate-spin" /></div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {allTools.slice(0, 3).map(tool => (
+                      <div key={tool.id} className="bg-[#13141b] border border-slate-700/50 rounded-xl p-5 hover:border-purple-500/50 transition-colors flex flex-col justify-between">
+                        <div>
+                          <div className="flex justify-between items-start mb-3 gap-3">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center border border-slate-700 overflow-hidden shrink-0">
+                                <img src={`https://logo.clearbit.com/${new URL(tool.url).hostname}`} alt={tool.name} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement!.innerHTML = `<span class="font-bold text-lg text-purple-400">${tool.name.charAt(0)}</span>`; }} />
+                              </div>
+                              <h3 className="font-bold text-lg text-white leading-tight truncate">{tool.name}</h3>
+                            </div>
+                            <span className="text-xs bg-slate-800 text-slate-300 py-1 px-2 rounded border border-slate-700 shrink-0">{tool.pricing}</span>
+                          </div>
+                          <p className="text-sm text-slate-400 mb-4 line-clamp-2">{locale === 'fr' ? (tool.description_fr || tool.description_en) : (tool.description_en || tool.description_fr)}</p>
+                        </div>
+                        <a href={tool.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-cyan-400 hover:text-cyan-300 flex items-center gap-1 w-fit mt-2">{t('Recent.visit')} <ExternalLink className="w-3 h-3" /></a>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
           )}
         </div>
-
       </main>
 
       <SubmitToolModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
