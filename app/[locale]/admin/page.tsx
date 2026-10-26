@@ -4,23 +4,35 @@ import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { CheckCircle, XCircle, Clock, ExternalLink, Loader2, ArrowLeft, Pencil, X, Trash2 } from 'lucide-react';
 
+// ✅ 1. LA LISTE DES TAGS EST ICI
+const predefinedTags = [
+  "Chatbot", "Copywriting", "Traduction", "Résumé", 
+  "Text-to-Image", "Text-to-Video", "Text-to-Speech", 
+  "Avatar", "Montage vidéo", "Édition photo", 
+  "Génération de code", "SQL", "API", "Automatisation", 
+  "Productivité", "Design UI/UX", "SEO", "Recherche"
+];
+
 export default function AdminDashboard() {
   const [tools, setTools] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
   
-  // Nouvel état pour gérer l'onglet actif
   const [activeTab, setActiveTab] = useState('pending'); 
 
-  // États pour la modale d'édition
   const [editingTool, setEditingTool] = useState(null);
+  
+  // ✅ 2. ON AJOUTE "tags: []" DANS L'ÉTAT INITIAL
   const [editFormData, setEditFormData] = useState({
-    name: '', url: '', description_fr: '', description_en: '', categories: [], pricing: ''
+    name: '', url: '', description_fr: '', description_en: '', 
+    categories: [] as string[], 
+    tags: [] as string[], 
+    pricing: ''
   });
+  
   const [isSaving, setIsSaving] = useState(false);
 
-  // Récupérer les outils en fonction de l'onglet actif
   const fetchTools = async () => {
     setIsLoading(true);
     setErrorMsg('');
@@ -28,7 +40,7 @@ export default function AdminDashboard() {
     const { data, error } = await supabase
       .from('tools')
       .select('*')
-      .eq('status', activeTab) // <-- On filtre selon l'onglet sélectionné
+      .eq('status', activeTab)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -40,7 +52,6 @@ export default function AdminDashboard() {
     setIsLoading(false);
   };
 
-  // On recharge la liste quand on change d'onglet
   useEffect(() => {
     fetchTools();
   }, [activeTab]);
@@ -55,7 +66,6 @@ export default function AdminDashboard() {
     if (error) {
       alert("Erreur : " + error.message);
     } else {
-      // On rafraîchit la liste
       fetchTools();
     }
     setActionLoading(null);
@@ -77,12 +87,14 @@ export default function AdminDashboard() {
 
   const openEditModal = (tool) => {
     setEditingTool(tool);
+    // ✅ 3. ON RÉCUPÈRE LES TAGS EXISTANTS
     setEditFormData({
       name: tool.name || '',
       url: tool.url || '',
       description_fr: tool.description_fr || '',
       description_en: tool.description_en || '',
       categories: tool.categories || [],
+      tags: tool.tags || [], 
       pricing: tool.pricing || 'Freemium'
     });
   };
@@ -104,10 +116,24 @@ export default function AdminDashboard() {
     });
   };
 
+  // ✅ 4. LA FONCTION POUR GÉRER LES TAGS
+  const handleTagToggle = (tag) => {
+    setEditFormData(prev => {
+      const isSelected = prev.tags.includes(tag);
+      return {
+        ...prev,
+        tags: isSelected 
+          ? prev.tags.filter(t => t !== tag) 
+          : [...prev.tags, tag]
+      };
+    });
+  };
+
   const handleSaveEdit = async (e) => {
     e.preventDefault();
     setIsSaving(true);
 
+    // ✅ 5. ON SAUVEGARDE LES TAGS DANS SUPABASE
     const { error } = await supabase
       .from('tools')
       .update({
@@ -116,6 +142,7 @@ export default function AdminDashboard() {
         description_fr: editFormData.description_fr,
         description_en: editFormData.description_en,
         categories: editFormData.categories,
+        tags: editFormData.tags, 
         pricing: editFormData.pricing
       })
       .eq('id', editingTool.id);
@@ -124,7 +151,7 @@ export default function AdminDashboard() {
       alert("Erreur : " + error.message);
     } else {
       setEditingTool(null);
-      fetchTools(); // Rafraîchir la liste
+      fetchTools();
     }
     setIsSaving(false);
   };
@@ -145,7 +172,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* ONGLETS DE NAVIGATION */}
         <div className="flex space-x-2 mb-6 bg-[#13141b] p-1 rounded-lg w-fit border border-slate-800">
           <button 
             onClick={() => setActiveTab('pending')}
@@ -199,6 +225,12 @@ export default function AdminDashboard() {
                       {tool.categories && tool.categories.map(cat => (
                         <span key={cat} className="text-xs bg-purple-500/20 text-purple-300 py-1 px-2 rounded border border-purple-500/30">
                           {cat}
+                        </span>
+                      ))}
+                      {/* ✅ 6. AFFICHAGE DES TAGS SUR LA CARTE ADMIN */}
+                      {tool.tags && tool.tags.map(tag => (
+                        <span key={tag} className="text-xs bg-cyan-500/10 text-cyan-400 py-1 px-2 rounded border border-cyan-500/20">
+                          {tag}
                         </span>
                       ))}
                     </div>
@@ -266,7 +298,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* MODALE D'ÉDITION (identique à avant) */}
+        {/* MODALE D'ÉDITION */}
         {editingTool && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setEditingTool(null)}></div>
@@ -308,6 +340,20 @@ export default function AdminDashboard() {
                       ))}
                     </div>
                   </div>
+                  
+                  {/* ✅ 7. LA SECTION TAGS DANS LA MODALE */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Tags</label>
+                    <div className="flex flex-wrap gap-2">
+                      {predefinedTags.map((tag) => (
+                        <label key={tag} className={`cursor-pointer px-3 py-1 rounded-full text-xs font-medium border transition-colors ${editFormData.tags.includes(tag) ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300' : 'bg-[#0b0c10] border-slate-700 text-slate-400 hover:border-slate-500'}`}>
+                          <input type="checkbox" className="hidden" checked={editFormData.tags.includes(tag)} onChange={() => handleTagToggle(tag)} />
+                          {tag}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">Prix</label>
                     <select name="pricing" value={editFormData.pricing} onChange={handleEditChange} className="w-full bg-[#0b0c10] border border-slate-700 rounded-lg py-2 px-4 text-sm text-white">

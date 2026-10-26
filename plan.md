@@ -50,3 +50,25 @@
 - [ ] Connecter le dépôt à Vercel.
 - [ ] Ajouter les variables d'environnement (`NEXT_PUBLIC_SUPABASE_URL`, `TURNSTILE_SECRET_KEY`, etc.) dans Vercel.
 - [ ] Acheter un nom de domaine et le lier à Vercel.
+
+
+Ce qui reste à faire :
+
+□ Ajouter les cases à cocher des Tags dans la modale d'édition de l'Admin.
+□ Sécuriser la page Admin avec un mot de passe (Login).
+□ Acheter un nom de domaine.
+□ Ajouter le SEO (Sitemap).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
