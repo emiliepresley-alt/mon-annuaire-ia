@@ -8,16 +8,15 @@ import {
 } from 'lucide-react';
 import { supabase } from '../../../../lib/supabase';
 import { useTranslations, useLocale } from 'next-intl';
-import AdBanner from '../../../../components/AdBanner';
+
 export default function CategoryPage() {
   const params = useParams();
-  const slug = params.slug; 
+  const slug = params.slug as string; 
 
-  // Traductions et Langue
   const t = useTranslations('CategoryPage');
   const tCat = useTranslations('Categories');
   const tFilters = useTranslations('Filters');
-  const locale = useLocale(); // <-- Récupère 'fr' ou 'en'
+  const locale = useLocale(); 
   
   const categoryTitle = tCat(`${slug}.title`);
 
@@ -30,23 +29,22 @@ export default function CategoryPage() {
   useEffect(() => {
     const fetchTools = async () => {
       setIsLoading(true);
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('tools')
         .select('*')
         .eq('status', 'approved')
-        .contains('categories', [slug]) // <-- Cherche dans le tableau de catégories
-        .in('language', [locale, 'both']) // <-- Filtre par langue
+        .contains('categories', [slug])
+        .in('language', [locale, 'both'])
         .order('created_at', { ascending: false });
 
       if (data) setTools(data);
       setIsLoading(false);
     };
     if (slug) fetchTools();
-  }, [slug, locale]); // On relance si la langue change
+  }, [slug, locale]);
 
   const filteredTools = useMemo(() => {
     return tools.filter(tool => {
-      // On cherche dans les descriptions (FR ou EN selon ce qui est dispo)
       const descFr = tool.description_fr || "";
       const descEn = tool.description_en || "";
       
@@ -59,7 +57,7 @@ export default function CategoryPage() {
     });
   }, [tools, priceFilters, searchQuery]);
 
-  const toggleFilter = (value) => {
+  const toggleFilter = (value: string) => {
     setPriceFilters(prev => prev.includes(value) ? prev.filter(item => item !== value) : [...prev, value]);
   };
 
@@ -150,20 +148,16 @@ export default function CategoryPage() {
                   <div>
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex gap-3 items-center">
-<div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center border border-slate-700 overflow-hidden shrink-0">
-  <img 
-    src={`https://logo.clearbit.com/${new URL(tool.url).hostname}`} 
-    alt={tool.name}
-    className="w-full h-full object-cover"
-    onError={(e) => {
-      // Si Clearbit ne trouve pas le logo, on affiche la première lettre
-      e.currentTarget.style.display = 'none';
-      e.currentTarget.parentElement!.innerHTML = `<span class="font-bold text-xl text-purple-400">${tool.name.charAt(0)}</span>`;
-    }}
-  />
-</div>
-						
-						
+                        {/* Logo */}
+                        <div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center border border-slate-700 relative overflow-hidden shrink-0">
+                          <span className="font-bold text-xl text-purple-400 absolute">{tool.name.charAt(0)}</span>
+                          <img 
+                            src={`https://logo.clearbit.com/${new URL(tool.url).hostname}`} 
+                            alt={tool.name}
+                            className="w-full h-full object-cover relative z-10 bg-[#13141b]"
+                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                          />
+                        </div>
                         <div>
                           <h3 className="font-bold text-lg text-white">{tool.name}</h3>
                           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
@@ -176,15 +170,17 @@ export default function CategoryPage() {
                         </div>
                       </div>
                     </div>
-                    {/* Description conditionnelle selon la langue */}
-                    <p className="text-sm text-slate-400 mb-4 line-clamp-2">
+                    
+                    <p className="text-sm text-slate-400 mb-2 line-clamp-2">
                       {locale === 'fr' 
                         ? (tool.description_fr || tool.description_en) 
                         : (tool.description_en || tool.description_fr)}
                     </p>
-					{tool.tags && tool.tags.length > 0 && (
+
+                    {/* TAGS */}
+                    {tool.tags && tool.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-4">
-                        {tool.tags.map(tag => (
+                        {tool.tags.map((tag: string) => (
                           <span key={tag} className="text-[10px] bg-slate-800 text-cyan-400 px-2 py-0.5 rounded border border-slate-700">
                             {tag}
                           </span>
@@ -192,16 +188,9 @@ export default function CategoryPage() {
                       </div>
                     )}
                   </div>
-					
-					
-					
-                  </div>
                   
                   <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-800/50">
                     <span className="text-xs text-slate-500">{t('submittedBy')} {tool.contributor || t('anonymous')}</span>
-					
-					
-					
                     <a href={tool.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-white flex items-center gap-1 hover:text-purple-400 transition-colors">
                       {t('visit')} <ExternalLink className="w-3 h-3" />
                     </a>
