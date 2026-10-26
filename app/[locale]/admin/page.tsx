@@ -4,14 +4,14 @@ import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { CheckCircle, XCircle, Clock, ExternalLink, Loader2, ArrowLeft, Pencil, X, Trash2, ChevronLeft, ChevronRight, LogOut, BrainCircuit } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl'; // <-- useTranslations ajouté
 
 const predefinedTags = [
-  "Chatbot", "Copywriting", "Traduction", "Résumé", 
-  "Text-to-Image", "Text-to-Video", "Text-to-Speech", 
-  "Avatar", "Montage vidéo", "Édition photo", 
-  "Génération de code", "SQL", "API", "Automatisation", 
-  "Productivité", "Design UI/UX", "SEO", "Recherche"
+  "chatbot", "copywriting", "translation", "summary", 
+  "text-to-image", "text-to-video", "text-to-speech", 
+  "avatar", "video-editing", "photo-editing", 
+  "code-generation", "sql", "api", "automation", 
+  "productivity", "ui-ux", "seo", "search"
 ];
 
 const ITEMS_PER_PAGE = 10;
@@ -47,6 +47,11 @@ export default function AdminDashboard() {
   const router = useRouter();
   const locale = useLocale(); 
   
+  // ✅ CORRECTION 1 : Les hooks sont maintenant DANS le composant
+  const t = useTranslations('Modal'); 
+  const tFilters = useTranslations('Filters'); 
+  const tTags = useTranslations('Tags'); 
+
   const [tools, setTools] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
@@ -68,7 +73,16 @@ export default function AdminDashboard() {
   const [session, setSession] = useState<any>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
-  // ✅ CORRECTION 1 : Redirection vers /{locale}/login
+  const getPricingLabel = (pricing: string) => {
+    switch (pricing) {
+      case 'Gratuit': return tFilters('prices.free');
+      case 'Freemium': return tFilters('prices.freemium');
+      case 'Payant': return tFilters('prices.paid');
+      case 'Open Source': return tFilters('prices.openSource');
+      default: return pricing;
+    }
+  };
+
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -241,10 +255,8 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-[#0b0c10] text-slate-200 font-sans p-6">
       <div className="max-w-5xl mx-auto">
         
-        {/* ✅ CORRECTION 2 : Header propre avec le bouton Déconnexion bien placé */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 border-b border-slate-800 pb-6 gap-4">
           <div>
-            {/* 👇 LE LOGO ET LE TEXTE SONT MAINTENANT CLIQUABLES 👇 */}
             <a href={`/${locale}`} className="group flex items-center gap-3 mb-4 transition-colors">
               <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-600 to-cyan-400 flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.3)] group-hover:scale-105 transition-transform">
                 <BrainCircuit className="text-white w-6 h-6" />
@@ -325,7 +337,7 @@ export default function AdminDashboard() {
                     <div className="flex items-center gap-3 mb-2 flex-wrap">
                       <h3 className="text-xl font-bold text-white">{tool.name}</h3>
                       <span className="text-xs bg-slate-800 text-slate-300 py-1 px-2 rounded border border-slate-700">
-                        {tool.pricing}
+                        {getPricingLabel(tool.pricing)}
                       </span>
                       <div className="flex gap-1 flex-wrap">
                         {tool.categories && tool.categories.map(cat => (
@@ -335,7 +347,7 @@ export default function AdminDashboard() {
                         ))}
                         {tool.tags && tool.tags.map(tag => (
                           <span key={tag} className="text-xs bg-cyan-500/10 text-cyan-400 py-1 px-2 rounded border border-cyan-500/20">
-                            {tag}
+                            {tTags(tag)}
                           </span>
                         ))}
                       </div>
@@ -491,7 +503,7 @@ export default function AdminDashboard() {
                       {predefinedTags.map((tag) => (
                         <label key={tag} className={`cursor-pointer px-3 py-1 rounded-full text-xs font-medium border transition-colors ${editFormData.tags.includes(tag) ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300' : 'bg-[#0b0c10] border-slate-700 text-slate-400 hover:border-slate-500'}`}>
                           <input type="checkbox" className="hidden" checked={editFormData.tags.includes(tag)} onChange={() => handleTagToggle(tag)} />
-                          {tag}
+                          {tTags(tag)}
                         </label>
                       ))}
                     </div>

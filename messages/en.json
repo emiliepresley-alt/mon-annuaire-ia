@@ -90,5 +90,25 @@
     "submittedBy": "Submitted by:",
     "anonymous": "Anonymous",
     "visit": "Visit"
-  }
+  },
+  "Tags": {
+    "chatbot": "Chatbot",
+    "copywriting": "Copywriting",
+    "translation": "Translation",
+    "summary": "Summary",
+    "text-to-image": "Text-to-Image",
+    "text-to-video": "Text-to-Video",
+    "text-to-speech": "Text-to-Speech",
+    "avatar": "Avatar",
+    "video-editing": "Video Editing",
+    "photo-editing": "Photo Editing",
+    "code-generation": "Code Generation",
+    "sql": "SQL",
+    "api": "API",
+    "automation": "Automation",
+    "productivity": "Productivity",
+    "ui-ux": "UI/UX Design",
+    "seo": "SEO",
+    "search": "Search"
+  }  
 }

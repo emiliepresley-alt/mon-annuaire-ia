@@ -6,18 +6,18 @@ import { Turnstile } from '@marsidev/react-turnstile';
 
 // On déclare les tags en dehors du composant (c'est plus propre)
 const predefinedTags = [
-  "Chatbot", "Copywriting", "Traduction", "Résumé", 
-  "Text-to-Image", "Text-to-Video", "Text-to-Speech", 
-  "Avatar", "Montage vidéo", "Édition photo", 
-  "Génération de code", "SQL", "API", "Automatisation", 
-  "Productivité", "Design UI/UX", "SEO", "Recherche"
+  "chatbot", "copywriting", "translation", "summary", 
+  "text-to-image", "text-to-video", "text-to-speech", 
+  "avatar", "video-editing", "photo-editing", 
+  "code-generation", "sql", "api", "automation", 
+  "productivity", "ui-ux", "seo", "search"
 ];
 
 export default function SubmitToolModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const t = useTranslations('Modal'); 
   const tCat = useTranslations('Categories'); 
   const tFilters = useTranslations('Filters'); 
-  
+  const tTags = useTranslations('Tags'); 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
@@ -225,7 +225,7 @@ export default function SubmitToolModal({ isOpen, onClose }: { isOpen: boolean, 
                   {predefinedTags.map((tag) => (
                     <label key={tag} className={`cursor-pointer px-3 py-1 rounded-full text-xs font-medium border transition-colors ${formData.tags.includes(tag) ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300' : 'bg-[#0b0c10] border-slate-700 text-slate-400 hover:border-slate-500'}`}>
                       <input type="checkbox" className="hidden" checked={formData.tags.includes(tag)} onChange={() => handleTagToggle(tag)} />
-                      {tag}
+                      {tTags(tag)}
                     </label>
                   ))}
                 </div>

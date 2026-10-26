@@ -90,5 +90,25 @@
     "submittedBy": "Proposé par :",
     "anonymous": "Anonyme",
     "visit": "Visiter"
+  },
+  "Tags": {
+    "chatbot": "Chatbot",
+    "copywriting": "Copywriting",
+    "translation": "Traduction",
+    "summary": "Résumé",
+    "text-to-image": "Text-to-Image",
+    "text-to-video": "Text-to-Video",
+    "text-to-speech": "Text-to-Speech",
+    "avatar": "Avatar",
+    "video-editing": "Montage vidéo",
+    "photo-editing": "Édition photo",
+    "code-generation": "Génération de code",
+    "sql": "SQL",
+    "api": "API",
+    "automation": "Automatisation",
+    "productivity": "Productivité",
+    "ui-ux": "Design UI/UX",
+    "seo": "SEO",
+    "search": "Recherche"
   }
 }

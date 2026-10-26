@@ -90,6 +90,7 @@ export default function AnnuaireDesktop() {
   const pathname = usePathname();
   const t = useTranslations();
   const tFilters = useTranslations('Filters');
+  const tTags = useTranslations('Tags');
   const locale = useLocale(); 
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -308,11 +309,11 @@ export default function AnnuaireDesktop() {
                         
                         {tool.tags && tool.tags.length > 0 && (
                           <div className="flex flex-wrap gap-1 mb-4">
-                            {tool.tags.map(tag => (
-                              <span key={tag} className="text-[10px] bg-slate-800 text-cyan-400 px-2 py-0.5 rounded border border-slate-700">
-                                {tag}
-                              </span>
-                            ))}
+{tool.tags.map(tag => (
+  <span key={tag} className="text-[10px] bg-slate-800 text-cyan-400 px-2 py-0.5 rounded border border-slate-700">
+    {tag} {/* <-- REMPLACE PAR {tTags(tag)} */}
+  </span>
+))}
                           </div>
                         )}
                       </div>
@@ -389,11 +390,11 @@ export default function AnnuaireDesktop() {
                           
                           {tool.tags && tool.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1 mb-4">
-                              {tool.tags.map(tag => (
-                                <span key={tag} className="text-[10px] bg-slate-800 text-cyan-400 px-2 py-0.5 rounded border border-slate-700">
-                                  {tag}
-                                </span>
-                              ))}
+{tool.tags.map(tag => (
+  <span key={tag} className="text-[10px] bg-slate-800 text-cyan-400 px-2 py-0.5 rounded border border-slate-700">
+    {tTags(tag)} {/* <-- CORRIGÉ ICI AUSSI */}
+  </span>
+))}
                             </div>
                           )}
                         </div>
