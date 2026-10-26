@@ -12,7 +12,37 @@ const predefinedTags = [
   "Productivité", "Design UI/UX", "SEO", "Recherche"
 ];
 
-const ITEMS_PER_PAGE = 10; // Nombre d'outils à afficher par page
+const ITEMS_PER_PAGE = 10;
+
+// ✅ Fonction pour calculer les numéros de page intelligemment
+const getPaginationRange = (current: number, total: number) => {
+  const delta = 1; // Nombre de pages à afficher à gauche et à droite de la page actuelle
+  const range = [];
+  const rangeWithDots = [];
+  let l;
+
+  for (let i = 1; i <= total; i++) {
+    // On garde toujours la page 1, la dernière page, et celles autour de la page actuelle
+    if (i === 1 || i === total || (i >= current - delta && i <= current + delta)) {
+      range.push(i);
+    }
+  }
+
+  // On ajoute les points de suspension si nécessaire
+  for (let i of range) {
+    if (l) {
+      if (i - l === 2) {
+        rangeWithDots.push(l + 1);
+      } else if (i - l !== 1) {
+        rangeWithDots.push('...');
+      }
+    }
+    rangeWithDots.push(i);
+    l = i;
+  }
+
+  return rangeWithDots;
+};
 
 export default function AdminDashboard() {
   const [tools, setTools] = useState([]);
@@ -20,10 +50,8 @@ export default function AdminDashboard() {
   const [actionLoading, setActionLoading] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
   
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalTools, setTotalTools] = useState(0);
-
   const [activeTab, setActiveTab] = useState('pending'); 
 
   const [editingTool, setEditingTool] = useState(null);
@@ -39,16 +67,15 @@ export default function AdminDashboard() {
     setIsLoading(true);
     setErrorMsg('');
     
-    // Calcul de la plage de données à récupérer (ex: de 0 à 9 pour la page 1)
     const from = (currentPage - 1) * ITEMS_PER_PAGE;
     const to = from + ITEMS_PER_PAGE - 1;
 
     const { data, count, error } = await supabase
       .from('tools')
-      .select('*', { count: 'exact' }) // 'count: exact' permet de savoir combien il y a de résultats au total
+      .select('*', { count: 'exact' })
       .eq('status', activeTab)
       .order('created_at', { ascending: false })
-      .range(from, to); // On ne récupère que la tranche pour la page actuelle
+      .range(from, to);
 
     if (error) {
       console.error(error);
@@ -60,12 +87,10 @@ export default function AdminDashboard() {
     setIsLoading(false);
   };
 
-  // On recharge quand on change d'onglet ou de page
   useEffect(() => {
     fetchTools();
   }, [activeTab, currentPage]);
 
-  // Si on change d'onglet, on revient à la page 1
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     setCurrentPage(1);
@@ -81,7 +106,7 @@ export default function AdminDashboard() {
     if (error) {
       alert("Erreur : " + error.message);
     } else {
-      fetchTools(); // Recharge la liste actuelle
+      fetchTools();
     }
     setActionLoading(null);
   };
@@ -95,7 +120,6 @@ export default function AdminDashboard() {
     if (error) {
       alert("Erreur : " + error.message);
     } else {
-      // Si on supprime le dernier élément d'une page, on recule d'une page
       if (tools.length === 1 && currentPage > 1) {
         setCurrentPage(currentPage - 1);
       } else {
@@ -173,7 +197,6 @@ export default function AdminDashboard() {
     setIsSaving(false);
   };
 
-  // Calcul du nombre total de pages
   const totalPages = Math.ceil(totalTools / ITEMS_PER_PAGE);
 
   return (
@@ -196,7 +219,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* ONGLETS DE NAVIGATION */}
         <div className="flex space-x-2 mb-6 bg-[#13141b] p-1 rounded-lg w-fit border border-slate-800">
           <button 
             onClick={() => handleTabChange('pending')}
@@ -322,34 +344,50 @@ export default function AdminDashboard() {
               ))}
             </div>
 
-            {/* 👇 PAGINATION 👇 */}
+            {/* 👇 NOUVELLE PAGINATION INTELLIGENTE 👇 */}
             {totalPages > 1 && (
-              <div className="flex justify-between items-center mt-8 pt-6 border-t border-slate-800">
+              <div className="flex justify-center items-center mt-8 pt-6 border-t border-slate-800 gap-2">
                 <button 
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#13141b] border border-slate-700 rounded-lg text-sm text-slate-300 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex items-center gap-1 px-3 py-2 bg-[#13141b] border border-slate-700 rounded-lg text-sm text-slate-300 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  <ChevronLeft className="w-4 h-4" /> Précédent
+                  <ChevronLeft className="w-4 h-4" /> <span className="hidden sm:inline">Précédent</span>
                 </button>
                 
-                <span className="text-sm text-slate-400">
-                  Page <strong className="text-white">{currentPage}</strong> sur {totalPages}
-                </span>
+                <div className="flex gap-1">
+                  {getPaginationRange(currentPage, totalPages).map((page, index) => (
+                    page === '...' ? (
+                      <span key={`dots-${index}`} className="px-3 py-2 text-slate-500">...</span>
+                    ) : (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page as number)}
+                        className={`px-3 py-2 rounded-lg text-sm transition-colors border ${
+                          currentPage === page 
+                            ? 'bg-purple-600 border-purple-500 text-white font-bold' 
+                            : 'bg-[#13141b] border-slate-700 text-slate-300 hover:text-white hover:border-slate-500'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    )
+                  ))}
+                </div>
 
                 <button 
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#13141b] border border-slate-700 rounded-lg text-sm text-slate-300 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex items-center gap-1 px-3 py-2 bg-[#13141b] border border-slate-700 rounded-lg text-sm text-slate-300 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  Suivant <ChevronRight className="w-4 h-4" />
+                  <span className="hidden sm:inline">Suivant</span> <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
             )}
           </>
         )}
 
-        {/* MODALE D'ÉDITION (Identique) */}
+        {/* MODALE D'ÉDITION */}
         {editingTool && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setEditingTool(null)}></div>
