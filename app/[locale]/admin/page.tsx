@@ -244,9 +244,19 @@ export default function AdminDashboard() {
         {/* ✅ CORRECTION 2 : Header propre avec le bouton Déconnexion bien placé */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 border-b border-slate-800 pb-6 gap-4">
           <div>
-            <Link href={`/${locale}`} className="text-sm text-slate-400 hover:text-white flex items-center gap-2 mb-2 transition-colors">
-              <ArrowLeft className="w-4 h-4" /> Retour au site
-            </Link>
+            {/* 👇 LE LOGO ET LE TEXTE SONT MAINTENANT CLIQUABLES 👇 */}
+            <a href={`/${locale}`} className="group flex items-center gap-3 mb-4 transition-colors">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-600 to-cyan-400 flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.3)] group-hover:scale-105 transition-transform">
+                <BrainCircuit className="text-white w-6 h-6" />
+              </div>
+              <div>
+                <span className="text-sm font-medium text-slate-300 group-hover:text-white flex items-center gap-1 transition-colors">
+                  <ArrowLeft className="w-4 h-4" /> Retour au site
+                </span>
+                <span className="text-xs text-slate-500">Annuaire de l'IA</span>
+              </div>
+            </a>
+
             <h1 className="text-3xl font-bold text-white flex items-center gap-3">
               <Clock className="w-8 h-8 text-purple-500" />
               Gestion des outils
