@@ -60,7 +60,15 @@ export default function CategoryPage() {
   const toggleFilter = (value: string) => {
     setPriceFilters(prev => prev.includes(value) ? prev.filter(item => item !== value) : [...prev, value]);
   };
-
+  const getPricingLabel = (pricing: string) => {
+    switch (pricing) {
+      case 'Gratuit': return tFilters('prices.free');
+      case 'Freemium': return tFilters('prices.freemium');
+      case 'Payant': return tFilters('prices.paid');
+      case 'Open Source': return tFilters('prices.openSource');
+      default: return pricing;
+    }
+  };
   return (
     <div className="min-h-screen bg-[#0b0c10] text-slate-200 font-sans">
       
@@ -160,13 +168,13 @@ export default function CategoryPage() {
                         </div>
                         <div>
                           <h3 className="font-bold text-lg text-white">{tool.name}</h3>
-                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                            tool.pricing === 'Freemium' ? 'bg-cyan-500/10 text-cyan-400' : 
-                            tool.pricing === 'Payant' ? 'bg-fuchsia-500/10 text-fuchsia-400' : 
-                            'bg-emerald-500/10 text-emerald-400'
-                          }`}>
-                            {tool.pricing}
-                          </span>
+<span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+  tool.pricing === 'Freemium' ? 'bg-cyan-500/10 text-cyan-400' : 
+  tool.pricing === 'Payant' ? 'bg-fuchsia-500/10 text-fuchsia-400' : 
+  'bg-emerald-500/10 text-emerald-400'
+}`}>
+  {getPricingLabel(tool.pricing)}
+</span>
                         </div>
                       </div>
                     </div>

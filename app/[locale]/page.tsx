@@ -158,7 +158,15 @@ export default function AnnuaireDesktop() {
     setPriceFilters([]);
     setAccessFilters([]);
   };
-
+  const getPricingLabel = (pricing: string) => {
+    switch (pricing) {
+      case 'Gratuit': return tFilters('prices.free');
+      case 'Freemium': return tFilters('prices.freemium');
+      case 'Payant': return tFilters('prices.paid');
+      case 'Open Source': return tFilters('prices.openSource');
+      default: return pricing;
+    }
+  };
   return (
     <div className="min-h-screen bg-[#0b0c10] text-slate-200 font-sans selection:bg-purple-500/30">
       
@@ -292,7 +300,7 @@ export default function AnnuaireDesktop() {
                             </div>
                             <h3 className="font-bold text-lg text-white leading-tight truncate">{tool.name}</h3>
                           </div>
-                          <span className="text-xs bg-slate-800 text-slate-300 py-1 px-2 rounded border border-slate-700 shrink-0">{tool.pricing}</span>
+                          <span className="text-xs bg-slate-800 text-slate-300 py-1 px-2 rounded border border-slate-700 shrink-0">{getPricingLabel(tool.pricing)}</span>
                         </div>
                         <p className="text-sm text-slate-400 mb-2 line-clamp-2">
                           {locale === 'fr' ? (tool.description_fr || tool.description_en) : (tool.description_en || tool.description_fr)}
@@ -375,7 +383,7 @@ export default function AnnuaireDesktop() {
                               </div>
                               <h3 className="font-bold text-lg text-white leading-tight truncate">{tool.name}</h3>
                             </div>
-                            <span className="text-xs bg-slate-800 text-slate-300 py-1 px-2 rounded border border-slate-700 shrink-0">{tool.pricing}</span>
+                            <span className="text-xs bg-slate-800 text-slate-300 py-1 px-2 rounded border border-slate-700 shrink-0">{getPricingLabel(tool.pricing)}</span>
                           </div>
                           <p className="text-sm text-slate-400 mb-2 line-clamp-2">{locale === 'fr' ? (tool.description_fr || tool.description_en) : (tool.description_en || tool.description_fr)}</p>
                           
