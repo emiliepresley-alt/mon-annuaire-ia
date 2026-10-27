@@ -4,7 +4,7 @@
     "subtitle": "Discover the best AI tools and resources.",
     "searchPlaceholder": "Search for a tool...",
     "submitButton": "Submit a tool",
-	"allToolsButton": "All tools",
+    "allToolsButton": "All tools"
   },
   "Filters": {
     "title": "Filters",
@@ -56,8 +56,11 @@
     "subtitle": "Help the community discover the best gems.",
     "nameLabel": "Tool name",
     "urlLabel": "Link (URL)",
-    "descLabel": "Short tagline",
-    "descPlaceholder": "In one sentence, what is this tool used for?",
+    "descLabelFr": "Short tagline (French)",
+    "descLabelEn": "Short tagline (English)",
+    "descPlaceholderFr": "In 1 sentence in French...",
+    "descPlaceholderEn": "In 1 sentence in English...",
+    "descError": "Please fill in at least one tagline.",
     "categoryLabel": "Main category",
     "categoryPlaceholder": "Select a category",
     "pricingLabel": "Pricing model",
@@ -69,11 +72,6 @@
     "successTitle": "Thank you for your contribution!",
     "successDesc1": "The tool",
     "successDesc2": "has been received. Our team will review it.",
-    "descLabelFr": "Short tagline (French)",
-    "descLabelEn": "Short tagline (English)",
-    "descPlaceholderFr": "En 1 phrase en français...",
-    "descPlaceholderEn": "In 1 sentence in English...",
-    "descError": "Veuillez remplir au moins une accroche (français ou anglais).",
     "close": "Close"
   },
   "CategoryPage": {
@@ -111,12 +109,12 @@
     "ui-ux": "UI/UX Design",
     "seo": "SEO",
     "search": "Search"
+  },
   "AllToolsPage": {
     "title": "All AI Tools",
     "subtitle": "Explore our entire catalog of artificial intelligence tools.",
     "toolsFound": "{count} tool(s) found",
     "searchPlaceholder": "Search for a tool...",
     "noTools": "No tools match your search."
-  }	
-  }  
+  }
 }

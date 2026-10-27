@@ -4,7 +4,7 @@
     "subtitle": "Découvrez les meilleurs outils et ressources IA.",
     "searchPlaceholder": "Rechercher un outil...",
     "submitButton": "Proposer un outil",
-	"allToolsButton": "Tous les outils"
+    "allToolsButton": "Tous les outils"
   },
   "Filters": {
     "title": "Filtres",
@@ -56,8 +56,11 @@
     "subtitle": "Aidez la communauté à découvrir les meilleures pépites.",
     "nameLabel": "Nom de l'outil",
     "urlLabel": "Lien (URL)",
-    "descLabel": "Accroche courte",
-    "descPlaceholder": "En 1 phrase, à quoi sert cet outil ?",
+    "descLabelFr": "Accroche courte (Français)",
+    "descLabelEn": "Accroche courte (Anglais)",
+    "descPlaceholderFr": "En 1 phrase en français...",
+    "descPlaceholderEn": "In 1 sentence in English...",
+    "descError": "Veuillez remplir au moins une accroche.",
     "categoryLabel": "Catégorie principale",
     "categoryPlaceholder": "Sélectionnez une catégorie",
     "pricingLabel": "Modèle d'accès",
@@ -69,11 +72,6 @@
     "successTitle": "Merci pour votre contribution !",
     "successDesc1": "L'outil",
     "successDesc2": "a bien été reçu. Notre équipe va le vérifier.",
-	"descLabelFr": "Accroche courte (Français)",
-    "descLabelEn": "Accroche courte (Anglais)",
-    "descPlaceholderFr": "En 1 phrase en français...",
-    "descPlaceholderEn": "In 1 sentence in English...",
-    "descError": "Veuillez remplir au moins une accroche (français ou anglais).",
     "close": "Fermer"
   },
   "CategoryPage": {
@@ -111,12 +109,12 @@
     "ui-ux": "Design UI/UX",
     "seo": "SEO",
     "search": "Recherche"
+  },
   "AllToolsPage": {
     "title": "Tous les outils IA",
     "subtitle": "Explorez l'intégralité de notre catalogue d'outils d'intelligence artificielle.",
     "toolsFound": "{count} outil(s) trouvé(s)",
     "searchPlaceholder": "Rechercher un outil...",
     "noTools": "Aucun outil ne correspond à votre recherche."
-  }
   }
 }
