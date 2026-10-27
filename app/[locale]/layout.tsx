@@ -1,6 +1,45 @@
+import { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
+import { getMessages, getTranslations } from 'next-intl/server';
 import '../globals.css';
+
+// ✅ NOUVELLE FONCTION : Génère les métadonnées selon la langue (FR ou EN)
+export async function generateMetadata({
+  params: { locale }
+}: {
+  params: { locale: string };
+}): Promise<Metadata> {
+  const t = await getTranslations({ locale, namespace: 'Header' });
+  const baseUrl = 'https://www.aifreedirectory.com';
+
+  return {
+    metadataBase: new URL(baseUrl),
+    title: t('title'),
+    description: t('subtitle'),
+    openGraph: {
+      title: t('title'),
+      description: t('subtitle'),
+      url: `${baseUrl}/${locale}`,
+      siteName: 'AI Free Directory',
+      images: [
+        {
+          url: `${baseUrl}/opengraph-image`, // L'image générée par Next.js
+          width: 1200,
+          height: 630,
+          alt: 'AI Free Directory',
+        },
+      ],
+      locale: locale === 'fr' ? 'fr_FR' : 'en_US',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: t('title'),
+      description: t('subtitle'),
+      images: [`${baseUrl}/opengraph-image`],
+    },
+  };
+}
 
 export default async function RootLayout({
   children,
