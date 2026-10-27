@@ -159,6 +159,7 @@ export default function AnnuaireDesktop() {
     setPriceFilters([]);
     setAccessFilters([]);
   };
+
   const getPricingLabel = (pricing: string) => {
     switch (pricing) {
       case 'Gratuit': return tFilters('prices.free');
@@ -168,6 +169,7 @@ export default function AnnuaireDesktop() {
       default: return pricing;
     }
   };
+
   return (
     <div className="min-h-screen bg-[#0b0c10] text-slate-200 font-sans selection:bg-purple-500/30">
       
@@ -206,15 +208,14 @@ export default function AnnuaireDesktop() {
               </button>
             )}
           </div>
-		  
-          {/* 👇 LE NOUVEAU BOUTON EST ICI 👇 */}
+
           <Link 
             href={`/${locale}/tools`}
             className="w-full sm:w-auto bg-[#13141b] border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 font-medium py-2 px-6 rounded-full flex items-center justify-center gap-2 transition-all"
           >
             {t('Header.allToolsButton')}
-          </Link>		  
-		  
+          </Link>
+          
           <button 
             onClick={() => setIsModalOpen(true)}
             className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-medium py-2 px-6 rounded-full flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(168,85,247,0.4)]"
@@ -295,40 +296,41 @@ export default function AnnuaireDesktop() {
               {filteredTools.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredTools.map(tool => (
-                    <div key={tool.id} className="bg-[#13141b] border border-slate-700/50 rounded-xl p-5 hover:border-purple-500/50 transition-colors flex flex-col justify-between">
-                      <div>
-                        <div className="flex justify-between items-start mb-3 gap-3">
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center border border-slate-700 overflow-hidden shrink-0 relative">
-                              <span className="font-bold text-lg text-purple-400 absolute">{tool.name.charAt(0)}</span>
-                              <img 
-                                src={`https://logo.clearbit.com/${new URL(tool.url).hostname}`} 
-                                alt={tool.name}
-                                className="w-full h-full object-cover relative z-10 bg-[#13141b]"
-                                onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                              />
-                            </div>
+                    <div key={tool.id} className="bg-[#13141b] border border-slate-700/50 rounded-xl p-5 hover:border-purple-500/50 transition-colors flex flex-col">
+                      <div className="flex justify-between items-start mb-3 gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center border border-slate-700 overflow-hidden shrink-0 relative">
+                            <span className="font-bold text-lg text-purple-400 absolute">{tool.name.charAt(0)}</span>
+                            <img 
+                              src={`https://logo.clearbit.com/${new URL(tool.url).hostname}`} 
+                              alt={tool.name}
+                              className="w-full h-full object-cover relative z-10 bg-[#13141b]"
+                              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                            />
+                          </div>
+                          <a href={tool.url} target="_blank" rel="noopener noreferrer" className="hover:text-purple-400 transition-colors">
                             <h3 className="font-bold text-lg text-white leading-tight truncate">{tool.name}</h3>
-                          </div>
-                          <span className="text-xs bg-slate-800 text-slate-300 py-1 px-2 rounded border border-slate-700 shrink-0">{getPricingLabel(tool.pricing)}</span>
+                          </a>
                         </div>
-                        <p className="text-sm text-slate-400 mb-2 line-clamp-2">
-                          {locale === 'fr' ? (tool.description_fr || tool.description_en) : (tool.description_en || tool.description_fr)}
-                        </p>
-                        
-                        {tool.tags && tool.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mb-4">
-{tool.tags.map(tag => (
-  <span key={tag} className="text-[10px] bg-slate-800 text-cyan-400 px-2 py-0.5 rounded border border-slate-700">
-    {tag} {/* <-- REMPLACE PAR {tTags(tag)} */}
-  </span>
-))}
-                          </div>
-                        )}
+                        <span className="text-xs bg-slate-800 text-slate-300 py-1 px-2 rounded border border-slate-700 shrink-0">{getPricingLabel(tool.pricing)}</span>
                       </div>
-                      <a href={tool.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-cyan-400 hover:text-cyan-300 flex items-center gap-1 w-fit mt-2">
-                        {t('Recent.visit')} <ExternalLink className="w-3 h-3" />
-                      </a>
+                      <p className="text-sm text-slate-400 mb-4 line-clamp-2">
+                        {locale === 'fr' ? (tool.description_fr || tool.description_en) : (tool.description_en || tool.description_fr)}
+                      </p>
+                      
+                      {tool.tags && tool.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-auto">
+                          {tool.tags.map(tag => (
+                            <Link 
+                              key={tag} 
+                              href={`/${locale}/tag/${tag}`}
+                              className="text-[10px] bg-slate-800 text-cyan-400 px-2 py-0.5 rounded border border-slate-700 hover:bg-slate-700 hover:text-white transition-colors"
+                            >
+                              {tTags(tag)}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -383,31 +385,30 @@ export default function AnnuaireDesktop() {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {allTools.slice(0, 3).map(tool => (
-                      <div key={tool.id} className="bg-[#13141b] border border-slate-700/50 rounded-xl p-5 hover:border-purple-500/50 transition-colors flex flex-col justify-between">
-                        <div>
-                          <div className="flex justify-between items-start mb-3 gap-3">
-                            <div className="flex items-center gap-3 min-w-0">
-                              <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center border border-slate-700 overflow-hidden shrink-0 relative">
-                                <span className="font-bold text-lg text-purple-400 absolute">{tool.name.charAt(0)}</span>
-                                <img src={`https://logo.clearbit.com/${new URL(tool.url).hostname}`} alt={tool.name} className="w-full h-full object-cover relative z-10 bg-[#13141b]" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                              </div>
+                      <div key={tool.id} className="bg-[#13141b] border border-slate-700/50 rounded-xl p-5 hover:border-purple-500/50 transition-colors flex flex-col">
+                        <div className="flex justify-between items-start mb-3 gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center border border-slate-700 overflow-hidden shrink-0 relative">
+                              <span className="font-bold text-lg text-purple-400 absolute">{tool.name.charAt(0)}</span>
+                              <img src={`https://logo.clearbit.com/${new URL(tool.url).hostname}`} alt={tool.name} className="w-full h-full object-cover relative z-10 bg-[#13141b]" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                            </div>
+                            <a href={tool.url} target="_blank" rel="noopener noreferrer" className="hover:text-purple-400 transition-colors">
                               <h3 className="font-bold text-lg text-white leading-tight truncate">{tool.name}</h3>
-                            </div>
-                            <span className="text-xs bg-slate-800 text-slate-300 py-1 px-2 rounded border border-slate-700 shrink-0">{getPricingLabel(tool.pricing)}</span>
+                            </a>
                           </div>
-                          <p className="text-sm text-slate-400 mb-2 line-clamp-2">{locale === 'fr' ? (tool.description_fr || tool.description_en) : (tool.description_en || tool.description_fr)}</p>
-                          
-                          {tool.tags && tool.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mb-4">
-{tool.tags.map(tag => (
-  <span key={tag} className="text-[10px] bg-slate-800 text-cyan-400 px-2 py-0.5 rounded border border-slate-700">
-    {tTags(tag)} {/* <-- CORRIGÉ ICI AUSSI */}
-  </span>
-))}
-                            </div>
-                          )}
+                          <span className="text-xs bg-slate-800 text-slate-300 py-1 px-2 rounded border border-slate-700 shrink-0">{getPricingLabel(tool.pricing)}</span>
                         </div>
-                        <a href={tool.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-cyan-400 hover:text-cyan-300 flex items-center gap-1 w-fit mt-2">{t('Recent.visit')} <ExternalLink className="w-3 h-3" /></a>
+                        <p className="text-sm text-slate-400 mb-4 line-clamp-2">{locale === 'fr' ? (tool.description_fr || tool.description_en) : (tool.description_en || tool.description_fr)}</p>
+                        
+                        {tool.tags && tool.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-auto">
+                            {tool.tags.map(tag => (
+                              <Link key={tag} href={`/${locale}/tag/${tag}`} className="text-[10px] bg-slate-800 text-cyan-400 px-2 py-0.5 rounded border border-slate-700 hover:bg-slate-700 transition-colors">
+                                {tTags(tag)}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

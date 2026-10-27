@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../../../../lib/supabase';
 import { useTranslations, useLocale } from 'next-intl';
-
+import AdBanner from '../../../../components/AdBanner';
 export default function CategoryPage() {
   const params = useParams();
   const slug = params.slug as string; 
@@ -117,32 +117,42 @@ export default function CategoryPage() {
       <main className="max-w-[1400px] mx-auto px-4 lg:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* SIDEBAR FILTRES */}
-        <aside className="hidden lg:block lg:col-span-3">
-          <div className="bg-[#13141b] border border-slate-800 rounded-2xl p-5 sticky top-24">
-            <div className="flex items-center gap-2 mb-6 text-cyan-400 border-b border-slate-800 pb-4">
-              <SlidersHorizontal className="w-5 h-5" />
-              <h2 className="font-semibold text-lg">{t('filtersTitle')}</h2>
-            </div>
+        <aside className="hidden lg:block lg:col-span-3 relative z-10 self-start">
+          
+          {/* 👇 Une seule div sticky qui englobe les filtres ET la pub 👇 */}
+          <div className="sticky top-24 space-y-6">
             
-            <div className="mb-6">
-              <h3 className="font-medium text-sm text-slate-200 mb-3">{t('pricingModel')}</h3>
-              <div className="space-y-2.5">
-                {[
-                  { value: 'Gratuit', label: tFilters('prices.free') },
-                  { value: 'Freemium', label: tFilters('prices.freemium') },
-                  { value: 'Payant', label: tFilters('prices.paid') },
-                  { value: 'Open Source', label: tFilters('prices.openSource') }
-                ].map((item) => (
-                  <label key={item.value} className="flex items-center gap-3 cursor-pointer group">
-                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${priceFilters.includes(item.value) ? 'bg-purple-500 border-purple-500' : 'border-slate-600 bg-slate-800'}`}>
-                      {priceFilters.includes(item.value) && <Check className="w-3 h-3 text-white" />}
-                    </div>
-                    <input type="checkbox" className="hidden" onChange={() => toggleFilter(item.value)} />
-                    <span className={`text-sm transition-colors ${priceFilters.includes(item.value) ? 'text-white font-medium' : 'text-slate-400 group-hover:text-slate-200'}`}>{item.label}</span>
-                  </label>
-                ))}
+            {/* Le bloc des filtres (sans le sticky ici) */}
+            <div className="bg-[#13141b] border border-slate-800 rounded-2xl p-5">
+              <div className="flex items-center gap-2 mb-6 text-cyan-400 border-b border-slate-800 pb-4">
+                <SlidersHorizontal className="w-5 h-5" />
+                <h2 className="font-semibold text-lg">{t('filtersTitle')}</h2>
+              </div>
+              
+              <div className="mb-6">
+                <h3 className="font-medium text-sm text-slate-200 mb-3">{t('pricingModel')}</h3>
+                <div className="space-y-2.5">
+                  {[
+                    { value: 'Gratuit', label: tFilters('prices.free') },
+                    { value: 'Freemium', label: tFilters('prices.freemium') },
+                    { value: 'Payant', label: tFilters('prices.paid') },
+                    { value: 'Open Source', label: tFilters('prices.openSource') }
+                  ].map((item) => (
+                    <label key={item.value} className="flex items-center gap-3 cursor-pointer group">
+                      <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${priceFilters.includes(item.value) ? 'bg-purple-500 border-purple-500' : 'border-slate-600 bg-slate-800'}`}>
+                        {priceFilters.includes(item.value) && <Check className="w-3 h-3 text-white" />}
+                      </div>
+                      <input type="checkbox" className="hidden" onChange={() => toggleFilter(item.value)} />
+                      <span className={`text-sm transition-colors ${priceFilters.includes(item.value) ? 'text-white font-medium' : 'text-slate-400 group-hover:text-slate-200'}`}>{item.label}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
+
+            {/* La bannière de pub (elle fait maintenant partie du bloc sticky) */}
+            <AdBanner />
+
           </div>
         </aside>
 
@@ -168,7 +178,9 @@ export default function CategoryPage() {
                           />
                         </div>
                         <div>
-                          <h3 className="font-bold text-lg text-white">{tool.name}</h3>
+                          <a href={tool.url} target="_blank" rel="noopener noreferrer" className="hover:text-purple-400 transition-colors">
+  <h3 className="font-bold text-lg text-white leading-tight truncate">{tool.name}</h3>
+</a>
 <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
   tool.pricing === 'Freemium' ? 'bg-cyan-500/10 text-cyan-400' : 
   tool.pricing === 'Payant' ? 'bg-fuchsia-500/10 text-fuchsia-400' : 
@@ -190,9 +202,13 @@ export default function CategoryPage() {
                     {tool.tags && tool.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-4">
 {tool.tags.map(tag => (
-  <span key={tag} className="text-[10px] bg-slate-800 text-cyan-400 px-2 py-0.5 rounded border border-slate-700">
+  <Link 
+    key={tag} 
+    href={`/${locale}/tag/${tag}`}
+    className="text-[10px] bg-slate-800 text-cyan-400 px-2 py-0.5 rounded border border-slate-700 hover:bg-slate-700 hover:text-white transition-colors"
+  >
     {tTags(tag)}
-  </span>
+  </Link>
 ))}
                       </div>
                     )}
@@ -200,9 +216,7 @@ export default function CategoryPage() {
                   
                   <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-800/50">
                     <span className="text-xs text-slate-500">{t('submittedBy')} {tool.contributor || t('anonymous')}</span>
-                    <a href={tool.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-white flex items-center gap-1 hover:text-purple-400 transition-colors">
-                      {t('visit')} <ExternalLink className="w-3 h-3" />
-                    </a>
+
                   </div>
                 </div>
               ))}

@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { useTranslations, useLocale } from 'next-intl';
-
+import AdBanner from '../../../components/AdBanner';
 const ITEMS_PER_PAGE = 12; // Nombre d'outils par page
 
 export default function AllToolsPage() {
@@ -120,7 +120,7 @@ export default function AllToolsPage() {
       <main className="max-w-[1400px] mx-auto px-4 lg:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* FILTRES */}
-        <aside className="hidden lg:block lg:col-span-3">
+        <aside className="hidden lg:block lg:col-span-3 relative z-10 self-start">
           <div className="bg-[#13141b] border border-slate-800 rounded-2xl p-5 sticky top-24">
             <div className="flex items-center gap-2 mb-6 text-cyan-400 border-b border-slate-800 pb-4">
               <Filter className="w-5 h-5" />
@@ -149,6 +149,8 @@ export default function AllToolsPage() {
               </div>
             </div>
           </div>
+
+		  <AdBanner />
         </aside>
 
         {/* GRILLE D'OUTILS */}
@@ -173,7 +175,9 @@ export default function AllToolsPage() {
                             />
                           </div>
                           <div>
-                            <h3 className="font-bold text-lg text-white line-clamp-1">{tool.name}</h3>
+                            <a href={tool.url} target="_blank" rel="noopener noreferrer" className="hover:text-purple-400 transition-colors">
+  <h3 className="font-bold text-lg text-white leading-tight truncate">{tool.name}</h3>
+</a>
                             <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                               tool.pricing === 'Freemium' ? 'bg-cyan-500/10 text-cyan-400' : 
                               tool.pricing === 'Payant' ? 'bg-fuchsia-500/10 text-fuchsia-400' : 
@@ -201,9 +205,7 @@ export default function AllToolsPage() {
                       )}
                     </div>
                     
-                    <a href={tool.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-cyan-400 hover:text-cyan-300 flex items-center gap-1 w-fit mt-2">
-                      {tFilters('title')} <ExternalLink className="w-3 h-3" />
-                    </a>
+
                   </div>
                 ))}
               </div>

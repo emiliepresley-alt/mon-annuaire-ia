@@ -60,11 +60,15 @@ Ce qui reste à faire :
 □ Ajouter le SEO (Sitemap).
 
 
+Ajouter pub dans les autres pages
 
-
-
-
-
+ailinkszone.com
+ Disponible
+aifreedirectory.com
+ Disponible
+ 
+ Rendre les noms clickables
+ Rendre les tags cliquables
 
 
 
