@@ -4,14 +4,14 @@ import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { CheckCircle, XCircle, Clock, ExternalLink, Loader2, ArrowLeft, Pencil, X, Trash2, ChevronLeft, ChevronRight, LogOut, BrainCircuit } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useTranslations, useLocale } from 'next-intl'; // <-- useTranslations ajouté
+import { useTranslations, useLocale } from 'next-intl';
 
 const predefinedTags = [
   "chatbot", "copywriting", "translation", "summary", 
   "text-to-image", "text-to-video", "text-to-speech", 
   "avatar", "video-editing", "photo-editing", 
   "code-generation", "sql", "api", "automation", 
-  "productivity", "ui-ux", "seo", "search"
+  "productivity", "ui-ux", "seo", "search", "open-source"
 ];
 
 const ITEMS_PER_PAGE = 10;
@@ -47,7 +47,6 @@ export default function AdminDashboard() {
   const router = useRouter();
   const locale = useLocale(); 
   
-  // ✅ CORRECTION 1 : Les hooks sont maintenant DANS le composant
   const t = useTranslations('Modal'); 
   const tFilters = useTranslations('Filters'); 
   const tTags = useTranslations('Tags'); 
@@ -62,12 +61,16 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('pending'); 
 
   const [editingTool, setEditingTool] = useState(null);
+  
+  // ✅ AJOUT DE "contributor" DANS L'ÉTAT INITIAL
   const [editFormData, setEditFormData] = useState({
     name: '', url: '', description_fr: '', description_en: '', 
     categories: [] as string[], 
     tags: [] as string[], 
-    pricing: ''
+    pricing: '',
+    contributor: '' 
   });
+  
   const [isSaving, setIsSaving] = useState(false);
   
   const [session, setSession] = useState<any>(null);
@@ -175,6 +178,7 @@ export default function AdminDashboard() {
 
   const openEditModal = (tool) => {
     setEditingTool(tool);
+    // ✅ ON RÉCUPÈRE LE CONTRIBUTEUR EXISTANT
     setEditFormData({
       name: tool.name || '',
       url: tool.url || '',
@@ -182,7 +186,8 @@ export default function AdminDashboard() {
       description_en: tool.description_en || '',
       categories: tool.categories || [],
       tags: tool.tags || [], 
-      pricing: tool.pricing || 'Freemium'
+      pricing: tool.pricing || 'Freemium',
+      contributor: tool.contributor || ''
     });
   };
 
@@ -219,6 +224,7 @@ export default function AdminDashboard() {
     e.preventDefault();
     setIsSaving(true);
 
+    // ✅ ON SAUVEGARDE LE CONTRIBUTEUR (vide devient NULL pour afficher "Anonyme")
     const { error } = await supabase
       .from('tools')
       .update({
@@ -228,7 +234,8 @@ export default function AdminDashboard() {
         description_en: editFormData.description_en,
         categories: editFormData.categories,
         tags: editFormData.tags, 
-        pricing: editFormData.pricing
+        pricing: editFormData.pricing,
+        contributor: editFormData.contributor || null
       })
       .eq('id', editingTool.id);
 
@@ -516,6 +523,19 @@ export default function AdminDashboard() {
                       <option value="Payant">Payant</option>
                       <option value="Open Source">Open Source</option>
                     </select>
+                  </div>
+                  
+                  {/* ✅ LE CHAMP CONTRIBUTEUR EST ICI */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-1.5">Contributeur (Proposé par)</label>
+                    <input 
+                      type="text" 
+                      name="contributor" 
+                      value={editFormData.contributor} 
+                      onChange={handleEditChange} 
+                      placeholder="Laisser vide pour afficher 'Anonyme'" 
+                      className="w-full bg-[#0b0c10] border border-slate-700 rounded-lg py-2 px-4 text-sm text-white" 
+                    />
                   </div>
                 </form>
               </div>
