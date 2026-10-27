@@ -5,12 +5,12 @@ import Link from 'next/link';
 import { Search, Filter, ExternalLink, BrainCircuit, ChevronRight, Loader2 } from 'lucide-react';
 import { supabase } from '../../../../lib/supabase';
 import { useTranslations, useLocale } from 'next-intl';
-import AdBanner from '../../../../components/AdBanner';
+
 export default function TagPage() {
   const params = useParams();
   const tag = params.tag as string; 
 
-  const t = useTranslations('CategoryPage'); // On réutilise les traductions de catégorie
+  const t = useTranslations('CategoryPage');
   const tFilters = useTranslations('Filters');
   const tTags = useTranslations('Tags');
   const locale = useLocale(); 
@@ -36,7 +36,7 @@ export default function TagPage() {
         .from('tools')
         .select('*')
         .eq('status', 'approved')
-        .contains('tags', [tag]) // <-- On cherche dans le tableau de tags
+        .contains('tags', [tag]) 
         .in('language', [locale, 'both'])
         .order('created_at', { ascending: false });
 
@@ -46,7 +46,7 @@ export default function TagPage() {
     if (tag) fetchTools();
   }, [tag, locale]);
 
-  const filteredTools = tools.filter(tool => 
+  const filteredTools = tools.filter((tool: any) => 
     tool.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -91,16 +91,11 @@ export default function TagPage() {
 
       <main className="max-w-[1400px] mx-auto px-4 lg:px-6 py-6 grid grid-cols-1 gap-8">
         <div>
-		        <div>
-          {/* 👇 AJOUTE LA BANNIÈRE ICI 👇 */}
-          <div className="mb-8">
-            <AdBanner />
-          </div>
           {isLoading ? (
             <div className="flex justify-center py-20"><Loader2 className="w-10 h-10 text-purple-500 animate-spin" /></div>
           ) : filteredTools.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filteredTools.map((tool) => (
+              {filteredTools.map((tool: any) => (
                 <div key={tool.id} className="bg-[#13141b] border border-slate-800 rounded-2xl p-5 hover:border-purple-500/50 transition-all flex flex-col justify-between">
                   <div>
                     <div className="flex justify-between items-start mb-3">
