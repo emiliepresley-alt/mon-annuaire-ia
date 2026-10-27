@@ -3,7 +3,8 @@
     "title": "Annuaire de l'Intelligence Artificielle",
     "subtitle": "Découvrez les meilleurs outils et ressources IA.",
     "searchPlaceholder": "Rechercher un outil...",
-    "submitButton": "Proposer un outil"
+    "submitButton": "Proposer un outil",
+	"allToolsButton": "Tous les outils"
   },
   "Filters": {
     "title": "Filtres",
@@ -110,5 +111,12 @@
     "ui-ux": "Design UI/UX",
     "seo": "SEO",
     "search": "Recherche"
+  "AllToolsPage": {
+    "title": "Tous les outils IA",
+    "subtitle": "Explorez l'intégralité de notre catalogue d'outils d'intelligence artificielle.",
+    "toolsFound": "{count} outil(s) trouvé(s)",
+    "searchPlaceholder": "Rechercher un outil...",
+    "noTools": "Aucun outil ne correspond à votre recherche."
+  }
   }
 }

@@ -3,7 +3,8 @@
     "title": "Artificial Intelligence Directory",
     "subtitle": "Discover the best AI tools and resources.",
     "searchPlaceholder": "Search for a tool...",
-    "submitButton": "Submit a tool"
+    "submitButton": "Submit a tool",
+	"allToolsButton": "All tools",
   },
   "Filters": {
     "title": "Filters",
@@ -110,5 +111,12 @@
     "ui-ux": "UI/UX Design",
     "seo": "SEO",
     "search": "Search"
+  "AllToolsPage": {
+    "title": "All AI Tools",
+    "subtitle": "Explore our entire catalog of artificial intelligence tools.",
+    "toolsFound": "{count} tool(s) found",
+    "searchPlaceholder": "Search for a tool...",
+    "noTools": "No tools match your search."
+  }	
   }  
 }

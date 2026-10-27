@@ -206,6 +206,15 @@ export default function AnnuaireDesktop() {
               </button>
             )}
           </div>
+		  
+          {/* 👇 LE NOUVEAU BOUTON EST ICI 👇 */}
+          <Link 
+            href={`/${locale}/tools`}
+            className="w-full sm:w-auto bg-[#13141b] border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 font-medium py-2 px-6 rounded-full flex items-center justify-center gap-2 transition-all"
+          >
+            {t('Header.allToolsButton')}
+          </Link>		  
+		  
           <button 
             onClick={() => setIsModalOpen(true)}
             className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-medium py-2 px-6 rounded-full flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(168,85,247,0.4)]"
