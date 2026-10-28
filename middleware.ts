@@ -6,6 +6,8 @@ export default createMiddleware({
 });
 
 export const config = {
-  // Matcher qui ignore les fichiers API, Next.js, Vercel et les fichiers avec extension (ex: robots.txt, sitemap.xml, favicon.ico)
-  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)']
+  // Regarde bien cette ligne : elle doit contenir sitemap.xml et robots.txt
+  matcher: [
+    '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\..*).*)'
+  ]
 };
