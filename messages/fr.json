@@ -108,8 +108,8 @@
     "productivity": "Productivité",
     "ui-ux": "Design UI/UX",
     "seo": "SEO",
-	"open-source": "Open Source",
-    "search": "Recherche"
+    "search": "Recherche",
+    "open-source": "Open Source"
   },
   "AllToolsPage": {
     "title": "Tous les outils IA",
@@ -118,12 +118,12 @@
     "searchPlaceholder": "Rechercher un outil...",
     "noTools": "Aucun outil ne correspond à votre recherche."
   },
-    "AdBanner": {
+  "AdBanner": {
     "title": "Votre publicité ici",
     "description": "Touchez une audience qualifiée de professionnels et créateurs.",
     "button": "Nous contacter"
   },
-    "FeaturedPage": {
+  "FeaturedPage": {
     "title": "Soyez mis en avant sur AI Free Directory",
     "subtitle": "Faites découvrir votre outil d'IA à une audience qualifiée de professionnels, de créateurs et de passionnés de technologie.",
     "ctaButton": "Soumettre mon outil",
@@ -138,5 +138,5 @@
     "badgeSubtitle": "Copiez ce code et collez-le sur votre site pour montrer que vous faites partie de l'annuaire.",
     "badgeCopy": "Copier le code",
     "badgeCopied": "Copié !"
-  },
+  }
 }

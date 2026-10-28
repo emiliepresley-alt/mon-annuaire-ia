@@ -108,8 +108,8 @@
     "productivity": "Productivity",
     "ui-ux": "UI/UX Design",
     "seo": "SEO",
-	"open-source": "Open Source",
-    "search": "Search"
+    "search": "Search",
+    "open-source": "Open Source"
   },
   "AllToolsPage": {
     "title": "All AI Tools",
@@ -123,7 +123,7 @@
     "description": "Reach a qualified audience of professionals and creators.",
     "button": "Contact us"
   },
-    "FeaturedPage": {
+  "FeaturedPage": {
     "title": "Get Featured on AI Free Directory",
     "subtitle": "Showcase your AI tool to a qualified audience of professionals, creators, and tech enthusiasts.",
     "ctaButton": "Submit my tool",
@@ -138,5 +138,5 @@
     "badgeSubtitle": "Copy this code and paste it on your site to show you're part of the directory.",
     "badgeCopy": "Copy code",
     "badgeCopied": "Copied!"
-  },
+  }
 }
