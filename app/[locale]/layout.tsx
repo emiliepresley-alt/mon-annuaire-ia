@@ -2,7 +2,10 @@ import { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import '../globals.css';
-
+import { Metadata, Viewport } from 'next';
+export const viewport: Viewport = {
+  themeColor: '#0b0c10',
+};
 // ✅ NOUVELLE FONCTION : Génère les métadonnées selon la langue (FR ou EN)
 export async function generateMetadata({
   params: { locale }
