@@ -117,5 +117,10 @@
     "toolsFound": "{count} tool(s) found",
     "searchPlaceholder": "Search for a tool...",
     "noTools": "No tools match your search."
+  },
+  "AdBanner": {
+    "title": "Your ad here",
+    "description": "Reach a qualified audience of professionals and creators.",
+    "button": "Contact us"
   }
 }

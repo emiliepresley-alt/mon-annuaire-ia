@@ -117,5 +117,10 @@
     "toolsFound": "{count} outil(s) trouvé(s)",
     "searchPlaceholder": "Rechercher un outil...",
     "noTools": "Aucun outil ne correspond à votre recherche."
+  },
+    "AdBanner": {
+    "title": "Votre publicité ici",
+    "description": "Touchez une audience qualifiée de professionnels et créateurs.",
+    "button": "Nous contacter"
   }
 }
