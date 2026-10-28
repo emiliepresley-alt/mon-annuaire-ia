@@ -227,7 +227,21 @@ export default function AnnuaireDesktop() {
       </header>
 
       <main className="max-w-[1600px] mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20">
-        
+                {/* 👇 BANNIÈRE FEATURED (Prend toute la largeur) 👇 */}
+        <div className="col-span-1 lg:col-span-12 mb-2">
+          <div className="bg-gradient-to-r from-purple-900/40 to-cyan-900/40 border border-purple-500/30 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold text-white mb-1">Vous êtes un créateur d'outil IA ?</h2>
+              <p className="text-sm text-slate-300">Soumettez votre outil et obtenez un badge pour votre site.</p>
+            </div>
+            <Link 
+              href={`/${locale}/featured`}
+              className="bg-white text-[#0b0c10] font-bold py-2 px-6 rounded-full hover:bg-slate-200 transition-colors whitespace-nowrap"
+            >
+              En savoir plus
+            </Link>
+          </div>
+        </div>
         <aside className="hidden lg:block lg:col-span-3 space-y-6">
           <div className="bg-[#13141b] border border-slate-800 rounded-2xl p-5">
             <div className="flex items-center justify-between mb-4 text-cyan-400">

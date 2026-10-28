@@ -122,5 +122,21 @@
     "title": "Votre publicité ici",
     "description": "Touchez une audience qualifiée de professionnels et créateurs.",
     "button": "Nous contacter"
-  }
+  },
+    "FeaturedPage": {
+    "title": "Soyez mis en avant sur AI Free Directory",
+    "subtitle": "Faites découvrir votre outil d'IA à une audience qualifiée de professionnels, de créateurs et de passionnés de technologie.",
+    "ctaButton": "Soumettre mon outil",
+    "whyTitle": "Pourquoi nous rejoindre ?",
+    "why1Title": "Visibilité Ciblée",
+    "why1Desc": "Touchez directement les utilisateurs qui cherchent activement des solutions d'IA.",
+    "why2Title": "Lien Dofollow (SEO)",
+    "why2Desc": "Améliorez le référencement de votre site grâce à un lien entrant de qualité.",
+    "why3Title": "Badge de Confiance",
+    "why3Desc": "Montrez à vos visiteurs que votre outil a été validé par notre équipe.",
+    "badgeTitle": "Affichez notre badge sur votre site",
+    "badgeSubtitle": "Copiez ce code et collez-le sur votre site pour montrer que vous faites partie de l'annuaire.",
+    "badgeCopy": "Copier le code",
+    "badgeCopied": "Copié !"
+  },
 }

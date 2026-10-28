@@ -122,5 +122,21 @@
     "title": "Your ad here",
     "description": "Reach a qualified audience of professionals and creators.",
     "button": "Contact us"
-  }
+  },
+    "FeaturedPage": {
+    "title": "Get Featured on AI Free Directory",
+    "subtitle": "Showcase your AI tool to a qualified audience of professionals, creators, and tech enthusiasts.",
+    "ctaButton": "Submit my tool",
+    "whyTitle": "Why join us?",
+    "why1Title": "Targeted Visibility",
+    "why1Desc": "Reach users who are actively looking for AI solutions.",
+    "why2Title": "Dofollow Link (SEO)",
+    "why2Desc": "Improve your website's SEO with a high-quality inbound link.",
+    "why3Title": "Trust Badge",
+    "why3Desc": "Show your visitors that your tool has been vetted by our team.",
+    "badgeTitle": "Display our badge on your website",
+    "badgeSubtitle": "Copy this code and paste it on your site to show you're part of the directory.",
+    "badgeCopy": "Copy code",
+    "badgeCopied": "Copied!"
+  },
 }
