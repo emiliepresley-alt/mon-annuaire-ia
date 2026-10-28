@@ -1,12 +1,12 @@
-import { Metadata } from 'next';
+import { Metadata, Viewport } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import '../globals.css';
-import { Metadata, Viewport } from 'next';
+
 export const viewport: Viewport = {
   themeColor: '#0b0c10',
 };
-// ✅ NOUVELLE FONCTION : Génère les métadonnées selon la langue (FR ou EN)
+
 export async function generateMetadata({
   params: { locale }
 }: {
@@ -26,7 +26,7 @@ export async function generateMetadata({
       siteName: 'AI Free Directory',
       images: [
         {
-          url: `${baseUrl}/opengraph-image`, // L'image générée par Next.js
+          url: `${baseUrl}/opengraph-image`, 
           width: 1200,
           height: 630,
           alt: 'AI Free Directory',
