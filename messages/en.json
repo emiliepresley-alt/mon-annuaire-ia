@@ -138,5 +138,10 @@
     "badgeSubtitle": "Copy this code and paste it on your site to show you're part of the directory.",
     "badgeCopy": "Copy code",
     "badgeCopied": "Copied!"
+  },
+    "FeaturedBanner": {
+    "title": "Are you an AI tool creator?",
+    "subtitle": "Submit your tool and get a badge for your website.",
+    "button": "Learn more"
   }
 }

@@ -138,5 +138,10 @@
     "badgeSubtitle": "Copiez ce code et collez-le sur votre site pour montrer que vous faites partie de l'annuaire.",
     "badgeCopy": "Copier le code",
     "badgeCopied": "Copié !"
+  },
+    "FeaturedBanner": {
+    "title": "Vous êtes un créateur d'outil IA ?",
+    "subtitle": "Soumettez votre outil et obtenez un badge pour votre site.",
+    "button": "En savoir plus"
   }
 }
