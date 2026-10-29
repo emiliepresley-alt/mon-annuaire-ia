@@ -9,7 +9,7 @@ import {
 import { supabase } from '../../../../lib/supabase';
 import { useTranslations, useLocale } from 'next-intl';
 import AdBanner from '../../../../components/AdBanner';
-import Footer from '../../components/Footer';
+import Footer from '@/components/Footer';
 export default function CategoryPage() {
   const params = useParams();
   const slug = params.slug as string; 

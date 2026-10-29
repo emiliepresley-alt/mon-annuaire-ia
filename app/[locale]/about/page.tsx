@@ -3,7 +3,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { BrainCircuit, ArrowLeft } from 'lucide-react';
-import Footer from '../../../components/Footer';
+import Footer from '@/components/Footer';
 
 export default function AboutPage() {
   const t = useTranslations('LegalPages');

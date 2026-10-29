@@ -7,7 +7,7 @@ import {
 import { supabase } from '../../../lib/supabase';
 import { useTranslations, useLocale } from 'next-intl';
 import AdBanner from '../../../components/AdBanner';
-import Footer from '../../components/Footer';
+import Footer from '@/components/Footer';
 const ITEMS_PER_PAGE = 12; // Nombre d'outils par page
 
 export default function AllToolsPage() {
