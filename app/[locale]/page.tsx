@@ -13,7 +13,7 @@ import { supabase } from '../../lib/supabase';
 import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
-
+import Footer from '../../components/Footer';
 // --- 1. DÉFINITION DES DONNÉES ---
 const categoriesUsage = [
   { id: 1, slug: "texte", icon: Type },
@@ -436,6 +436,7 @@ export default function AnnuaireDesktop() {
       </main>
 
       <SubmitToolModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+	  <Footer />
     </div>
   );
 }

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { Sparkles, ArrowRight, ShieldCheck, Link as LinkIcon, Eye, Check } from 'lucide-react';
-
+import Footer from '../../components/Footer';
 export default function FeaturedPage() {
   const t = useTranslations('FeaturedPage');
   const locale = useLocale();
@@ -120,6 +120,7 @@ export default function FeaturedPage() {
         </div>
 
       </main>
+	  <Footer />
     </div>
   );
 }

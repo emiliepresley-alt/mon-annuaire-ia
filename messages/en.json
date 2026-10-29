@@ -143,5 +143,28 @@
     "title": "Are you an AI tool creator?",
     "subtitle": "Submit your tool and get a badge for your website.",
     "button": "Learn more"
+  },
+    "Footer": {
+    "description": "The reference directory to discover the best Artificial Intelligence tools.",
+    "navigation": "Navigation",
+    "home": "Home",
+    "allTools": "All tools",
+    "featured": "Featured",
+    "legal": "Information",
+    "about": "About",
+    "privacy": "Privacy Policy",
+    "contact": "Contact",
+    "rights": "All rights reserved."
+  },
+    "LegalPages": {
+    "aboutTitle": "About AI Free Directory",
+    "aboutDesc": "AI Free Directory was born from a simple idea: artificial intelligence is evolving so fast that it's becoming hard to keep up. Our mission is to provide a clear, curated, and bilingual directory to help you find the perfect tool, whether you're a developer, creator, or just curious. We test and organize the best tools to save you time.",
+    "privacyTitle": "Privacy Policy",
+    "privacyDesc": "Last updated: October 2026. At AI Free Directory, our visitors' privacy is a priority. This page explains what data we collect and how it is used.",
+    "privacyCookies": "Cookies and Ads: This site uses Google AdSense to serve ads. Google uses cookies to serve ads based on your prior visits to this website or other websites. You can opt out of personalized advertising by visiting Google's Ads Settings.",
+    "privacyData": "Data Collection: We do not collect any personally identifiable information, unless you voluntarily contact us via email or through the submission form.",
+    "contactTitle": "Contact Us",
+    "contactDesc": "Have a question, a suggestion, or want to submit your tool? Feel free to write to us. We usually reply within 24 to 48 hours.",
+    "contactButton": "Send an email"
   }
 }

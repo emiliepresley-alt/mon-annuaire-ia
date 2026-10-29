@@ -143,5 +143,28 @@
     "title": "Vous êtes un créateur d'outil IA ?",
     "subtitle": "Soumettez votre outil et obtenez un badge pour votre site.",
     "button": "En savoir plus"
+  },
+    "Footer": {
+    "description": "L'annuaire de référence pour découvrir les meilleurs outils d'Intelligence Artificielle.",
+    "navigation": "Navigation",
+    "home": "Accueil",
+    "allTools": "Tous les outils",
+    "featured": "Featured",
+    "legal": "Informations",
+    "about": "À propos",
+    "privacy": "Politique de confidentialité",
+    "contact": "Contact",
+    "rights": "Tous droits réservés."
+  },
+    "LegalPages": {
+    "aboutTitle": "À propos de AI Free Directory",
+    "aboutDesc": "AI Free Directory est né d'une idée simple : l'intelligence artificielle évolue si vite qu'il devient difficile de s'y retrouver. Notre mission est de vous offrir un annuaire clair, curaté et bilingue pour trouver l'outil parfait, que vous soyez développeur, créateur, ou simplement curieux. Nous testons et organisons les meilleurs outils pour vous faire gagner du temps.",
+    "privacyTitle": "Politique de confidentialité",
+    "privacyDesc": "Dernière mise à jour : Octobre 2026. Chez AI Free Directory, la vie privée de nos visiteurs est une priorité. Cette page explique quelles données nous collectons et comment elles sont utilisées.",
+    "privacyCookies": "Cookies et Publicités : Ce site utilise Google AdSense pour diffuser des annonces. Google utilise des cookies pour diffuser des annonces basées sur vos visites précédentes sur ce site ou d'autres sites. Vous pouvez désactiver la publicité personnalisée en visitant les Paramètres des annonces de Google.",
+    "privacyData": "Collecte de données : Nous ne collectons aucune information personnelle identifiable, sauf si vous nous contactez volontairement par email ou via le formulaire de soumission.",
+    "contactTitle": "Contactez-nous",
+    "contactDesc": "Une question, une suggestion, ou vous souhaitez faire référencer votre outil ? N'hésitez pas à nous écrire. Nous répondons généralement sous 24 à 48 heures.",
+    "contactButton": "Envoyer un email"
   }
 }
