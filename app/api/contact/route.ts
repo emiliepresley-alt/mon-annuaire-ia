@@ -13,7 +13,7 @@ export async function POST(request: Request) {
 
     const { error } = await resend.emails.send({
       from: 'AI Free Directory <onboarding@resend.dev>',
-      to: 'contact@aifreedirectory.com',
+      to: 'emiliepresley@gmail.com',
       replyTo: email,
       subject: `Nouveau message de ${name}`,
       html: `
