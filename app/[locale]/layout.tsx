@@ -60,8 +60,11 @@ export default async function RootLayout({
           {children}
         </NextIntlClientProvider>
 		
-		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0451071798143683"
-     crossorigin="anonymous"></script>
+		<script 
+  async 
+  src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0451071798143683"
+  crossOrigin="anonymous"
+></script>
       </body>
     </html>
   );
