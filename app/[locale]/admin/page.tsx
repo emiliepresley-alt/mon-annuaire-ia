@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase'; 
 import Link from 'next/link';
-import { CheckCircle, XCircle, Clock, ExternalLink, Loader2, ArrowLeft, Pencil, X, Trash2, ChevronLeft, ChevronRight, LogOut, BrainCircuit } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, ExternalLink, Loader2, ArrowLeft, Pencil, X, Trash2, ChevronLeft, ChevronRight, LogOut, BrainCircuit, Upload } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 
@@ -287,6 +287,15 @@ export default function AdminDashboard() {
               <span className="text-sm text-slate-400">Total :</span>
               <span className="text-xl font-bold text-purple-400">{totalTools}</span>
             </div>
+			
+			            {/* 👇 BOUTON IMPORT 👇 */}
+            <Link 
+              href={`/${locale}/admin/import`}
+              className="flex items-center gap-2 px-4 py-2.5 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20 rounded-lg transition-colors text-sm font-medium"
+            >
+              <Upload className="w-4 h-4" /> Importer
+            </Link>
+			
             <button 
               onClick={handleLogout}
               className="flex items-center gap-2 px-4 py-2.5 bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 rounded-lg transition-colors text-sm font-medium"
