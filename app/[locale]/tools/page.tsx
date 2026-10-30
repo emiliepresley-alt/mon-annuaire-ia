@@ -6,11 +6,9 @@ import {
 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { useTranslations, useLocale } from 'next-intl';
-import AdBanner from '../../../components/AdBanner';
-import Footer from '@/components/Footer';
 import UpvoteButton from '@/components/UpvoteButton';
 
-const ITEMS_PER_PAGE = 12; // Nombre d'outils par page
+const ITEMS_PER_PAGE = 12; 
 
 export default function AllToolsPage() {
   const t = useTranslations('AllToolsPage');
@@ -36,7 +34,6 @@ export default function AllToolsPage() {
     }
   };
 
-  // Récupération des données avec pagination
   useEffect(() => {
     const fetchTools = async () => {
       setIsLoading(true);
@@ -60,7 +57,6 @@ export default function AllToolsPage() {
     fetchTools();
   }, [locale, currentPage]);
 
-  // Filtrage local (Recherche + Prix)
   const filteredTools = useMemo(() => {
     return tools.filter(tool => {
       const descFr = tool.description_fr || "";
@@ -123,37 +119,37 @@ export default function AllToolsPage() {
       <main className="max-w-[1400px] mx-auto px-4 lg:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* FILTRES */}
-        <aside className="hidden lg:block lg:col-span-3 relative z-10 self-start">
-          <div className="bg-[#13141b] border border-slate-800 rounded-2xl p-5 sticky top-24">
-            <div className="flex items-center gap-2 mb-6 text-cyan-400 border-b border-slate-800 pb-4">
-              <Filter className="w-5 h-5" />
-              <h2 className="font-semibold text-lg">{tFilters('title')}</h2>
-            </div>
-            
-            <div className="mb-6">
-              <h3 className="font-medium text-sm text-slate-200 mb-3">{tFilters('price')}</h3>
-              <div className="space-y-2.5">
-                {[
-                  { value: 'Gratuit', label: tFilters('prices.free') },
-                  { value: 'Freemium', label: tFilters('prices.freemium') },
-                  { value: 'Payant', label: tFilters('prices.paid') },
-                  { value: 'Open Source', label: tFilters('prices.openSource') }
-                ].map((item) => (
-                  <label key={item.value} className="flex items-center gap-3 cursor-pointer group">
-                    <input 
-                      type="checkbox" 
-                      checked={priceFilters.includes(item.value)}
-                      onChange={() => toggleFilter(item.value)}
-                      className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-purple-500 focus:ring-purple-500/20" 
-                    />
-                    <span className="text-sm text-slate-300 group-hover:text-white transition-colors">{item.label}</span>
-                  </label>
-                ))}
+        <aside className="hidden lg:block lg:col-span-3 relative z-10">
+          <div className="sticky top-24">
+            <div className="bg-[#13141b] border border-slate-800 rounded-2xl p-5">
+              <div className="flex items-center gap-2 mb-6 text-cyan-400 border-b border-slate-800 pb-4">
+                <Filter className="w-5 h-5" />
+                <h2 className="font-semibold text-lg">{tFilters('title')}</h2>
+              </div>
+              
+              <div className="mb-6">
+                <h3 className="font-medium text-sm text-slate-200 mb-3">{tFilters('price')}</h3>
+                <div className="space-y-2.5">
+                  {[
+                    { value: 'Gratuit', label: tFilters('prices.free') },
+                    { value: 'Freemium', label: tFilters('prices.freemium') },
+                    { value: 'Payant', label: tFilters('prices.paid') },
+                    { value: 'Open Source', label: tFilters('prices.openSource') }
+                  ].map((item) => (
+                    <label key={item.value} className="flex items-center gap-3 cursor-pointer group">
+                      <input 
+                        type="checkbox" 
+                        checked={priceFilters.includes(item.value)}
+                        onChange={() => toggleFilter(item.value)}
+                        className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-purple-500 focus:ring-purple-500/20" 
+                      />
+                      <span className="text-sm text-slate-300 group-hover:text-white transition-colors">{item.label}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
-
-		  <AdBanner />
         </aside>
 
         {/* GRILLE D'OUTILS */}
@@ -191,13 +187,7 @@ export default function AllToolsPage() {
                           </div>
                         </div>
                         
-                        {/* 👇 LE BOUTON D'UPVOTE EST ICI 👇 */}
-                        <div className="shrink-0">
-                          <UpvoteButton toolId={tool.id} initialVotes={tool.upvotes || 0} />
-                        </div>
-                      </div>
-                        
-                        {/* 👇 LE BOUTON D'UPVOTE EST ICI 👇 */}
+                        {/* BOUTON UPVOTE */}
                         <div className="shrink-0">
                           <UpvoteButton toolId={tool.id} initialVotes={tool.upvotes || 0} />
                         </div>
@@ -209,17 +199,14 @@ export default function AllToolsPage() {
 
                       {tool.tags && tool.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mb-4">
-                          {tool.tags.slice(0, 3).map((tag: string) => (
-                            <span key={tag} className="text-[10px] bg-slate-800 text-cyan-400 px-2 py-0.5 rounded border border-slate-700">
+                          {tool.tags.map((tag: string) => (
+                            <Link key={tag} href={`/${locale}/tag/${tag}`} className="text-[10px] bg-slate-800 text-cyan-400 px-2 py-0.5 rounded border border-slate-700 hover:bg-slate-700 transition-colors">
                               {tTags(tag)}
-                            </span>
+                            </Link>
                           ))}
-                          {tool.tags.length > 3 && <span className="text-[10px] text-slate-500">+{tool.tags.length - 3}</span>}
                         </div>
                       )}
                     </div>
-                    
-
                   </div>
                 ))}
               </div>
@@ -255,7 +242,6 @@ export default function AllToolsPage() {
           )}
         </div>
       </main>
-	  <Footer />
     </div>
   );
 }
