@@ -20,6 +20,9 @@ export default function AllToolsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [totalTools, setTotalTools] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  
+  // ✅ Nouvel état pour le tri
+  const [sortBy, setSortBy] = useState('recent'); 
 
   const [searchQuery, setSearchQuery] = useState("");
   const [priceFilters, setPriceFilters] = useState<string[]>([]);
@@ -40,13 +43,21 @@ export default function AllToolsPage() {
       const from = (currentPage - 1) * ITEMS_PER_PAGE;
       const to = from + ITEMS_PER_PAGE - 1;
 
-      const { data, count, error } = await supabase
+      // ✅ On prépare la requête
+      let query = supabase
         .from('tools')
         .select('*', { count: 'exact' })
         .eq('status', 'approved')
-        .in('language', [locale, 'both'])
-        .order('created_at', { ascending: false })
-        .range(from, to);
+        .in('language', [locale, 'both']);
+
+      // ✅ On applique le tri selon le choix de l'utilisateur
+      if (sortBy === 'popular') {
+        query = query.order('upvotes', { ascending: false });
+      } else {
+        query = query.order('created_at', { ascending: false });
+      }
+
+      const { data, count, error } = await query.range(from, to);
 
       if (data) {
         setTools(data);
@@ -55,7 +66,7 @@ export default function AllToolsPage() {
       setIsLoading(false);
     };
     fetchTools();
-  }, [locale, currentPage]);
+  }, [locale, currentPage, sortBy]); // On recharge si le tri change
 
   const filteredTools = useMemo(() => {
     return tools.filter(tool => {
@@ -102,16 +113,32 @@ export default function AllToolsPage() {
         </div>
       </header>
 
-      {/* TITRE */}
+      {/* TITRE & TRI */}
       <div className="max-w-[1400px] mx-auto px-4 lg:px-6 pt-8 pb-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">{t('title')}</h1>
             <p className="text-slate-400">{t('subtitle')}</p>
           </div>
-          <span className="text-sm font-medium bg-slate-800 py-1 px-3 rounded-full text-slate-300">
-            {t('toolsFound', { count: totalTools })}
-          </span>
+          
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-medium bg-slate-800 py-1 px-3 rounded-full text-slate-300">
+              {t('toolsFound', { count: totalTools })}
+            </span>
+            
+            {/* ✅ MENU DE TRI */}
+            <select 
+              value={sortBy}
+              onChange={(e) => {
+                setSortBy(e.target.value);
+                setCurrentPage(1); // On revient à la page 1 quand on change le tri
+              }}
+              className="bg-[#13141b] border border-slate-700 text-slate-300 text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-cyan-500 cursor-pointer"
+            >
+              <option value="recent">{t('mostRecent')}</option>
+              <option value="popular">{t('mostPopular')}</option>
+            </select>
+          </div>
         </div>
       </div>
 

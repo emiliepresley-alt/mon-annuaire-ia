@@ -116,7 +116,9 @@
     "subtitle": "Explore our entire catalog of artificial intelligence tools.",
     "toolsFound": "{count} tool(s) found",
     "searchPlaceholder": "Search for a tool...",
-    "noTools": "No tools match your search."
+    "noTools": "No tools match your search.",
+	"mostRecent": "Most recent",
+    "mostPopular": "Most popular"
   },
   "AdBanner": {
     "title": "Your ad here",

@@ -116,7 +116,9 @@
     "subtitle": "Explorez l'intégralité de notre catalogue d'outils d'intelligence artificielle.",
     "toolsFound": "{count} outil(s) trouvé(s)",
     "searchPlaceholder": "Rechercher un outil...",
-    "noTools": "Aucun outil ne correspond à votre recherche."
+    "noTools": "Aucun outil ne correspond à votre recherche.",
+	"mostRecent": "Plus récents",
+    "mostPopular": "Plus populaires",
   },
   "AdBanner": {
     "title": "Votre publicité ici",
