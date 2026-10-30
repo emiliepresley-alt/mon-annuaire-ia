@@ -21,8 +21,8 @@ export default function AllToolsPage() {
   const [totalTools, setTotalTools] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   
-  // ✅ Nouvel état pour le tri
-  const [sortBy, setSortBy] = useState('recent'); 
+  // ✅ État pour le tri
+  const [sortBy, setSortBy] = useState<'recent' | 'popular'>('recent'); 
 
   const [searchQuery, setSearchQuery] = useState("");
   const [priceFilters, setPriceFilters] = useState<string[]>([]);
@@ -43,14 +43,13 @@ export default function AllToolsPage() {
       const from = (currentPage - 1) * ITEMS_PER_PAGE;
       const to = from + ITEMS_PER_PAGE - 1;
 
-      // ✅ On prépare la requête
+      // ✅ La requête Supabase prend en compte le tri
       let query = supabase
         .from('tools')
         .select('*', { count: 'exact' })
         .eq('status', 'approved')
         .in('language', [locale, 'both']);
 
-      // ✅ On applique le tri selon le choix de l'utilisateur
       if (sortBy === 'popular') {
         query = query.order('upvotes', { ascending: false });
       } else {
@@ -66,7 +65,7 @@ export default function AllToolsPage() {
       setIsLoading(false);
     };
     fetchTools();
-  }, [locale, currentPage, sortBy]); // On recharge si le tri change
+  }, [locale, currentPage, sortBy]); // On recharge quand le tri change
 
   const filteredTools = useMemo(() => {
     return tools.filter(tool => {
@@ -113,7 +112,7 @@ export default function AllToolsPage() {
         </div>
       </header>
 
-      {/* TITRE & TRI */}
+      {/* TITRE & BOUTONS DE TRI */}
       <div className="max-w-[1400px] mx-auto px-4 lg:px-6 pt-8 pb-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
           <div>
@@ -121,23 +120,34 @@ export default function AllToolsPage() {
             <p className="text-slate-400">{t('subtitle')}</p>
           </div>
           
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-medium bg-slate-800 py-1 px-3 rounded-full text-slate-300">
+          <div className="flex items-center gap-4 flex-wrap">
+            <span className="text-sm font-medium bg-slate-800 py-1.5 px-3 rounded-full text-slate-300">
               {t('toolsFound', { count: totalTools })}
             </span>
             
-            {/* ✅ MENU DE TRI */}
-            <select 
-              value={sortBy}
-              onChange={(e) => {
-                setSortBy(e.target.value);
-                setCurrentPage(1); // On revient à la page 1 quand on change le tri
-              }}
-              className="bg-[#13141b] border border-slate-700 text-slate-300 text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-cyan-500 cursor-pointer"
-            >
-              <option value="recent">{t('mostRecent')}</option>
-              <option value="popular">{t('mostPopular')}</option>
-            </select>
+            {/* ✅ LES DEUX BOUTONS DE TRI SONT ICI */}
+            <div className="flex bg-[#13141b] border border-slate-700 rounded-lg p-1">
+              <button
+                onClick={() => { setSortBy('recent'); setCurrentPage(1); }}
+                className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                  sortBy === 'recent' 
+                    ? 'bg-slate-800 text-white shadow' 
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {t('mostRecent')}
+              </button>
+              <button
+                onClick={() => { setSortBy('popular'); setCurrentPage(1); }}
+                className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                  sortBy === 'popular' 
+                    ? 'bg-slate-800 text-white shadow' 
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {t('mostPopular')}
+              </button>
+            </div>
           </div>
         </div>
       </div>
