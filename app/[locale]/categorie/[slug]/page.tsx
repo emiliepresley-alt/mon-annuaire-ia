@@ -10,6 +10,8 @@ import { supabase } from '../../../../lib/supabase';
 import { useTranslations, useLocale } from 'next-intl';
 import AdBanner from '../../../../components/AdBanner';
 import Footer from '@/components/Footer';
+import UpvoteButton from '@/components/UpvoteButton';
+
 export default function CategoryPage() {
   const params = useParams();
   const slug = params.slug as string; 
@@ -166,32 +168,36 @@ export default function CategoryPage() {
               {filteredTools.map((tool) => (
                 <div key={tool.id} className="bg-[#13141b] border border-slate-800 rounded-2xl p-5 hover:border-purple-500/50 transition-all group flex flex-col justify-between">
                   <div>
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="flex gap-3 items-center">
-                        {/* Logo */}
-                        <div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center border border-slate-700 relative overflow-hidden shrink-0">
-                          <span className="font-bold text-xl text-purple-400 absolute">{tool.name.charAt(0)}</span>
-                          <img 
-                            src={`https://logo.clearbit.com/${new URL(tool.url).hostname}`} 
-                            alt={tool.name}
-                            className="w-full h-full object-cover relative z-10 bg-[#13141b]"
-                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                          />
+                      <div className="flex justify-between items-start mb-3 gap-2">
+                        <div className="flex gap-3 items-center min-w-0">
+                          <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center border border-slate-700 relative overflow-hidden shrink-0">
+                            <span className="font-bold text-lg text-purple-400 absolute">{tool.name.charAt(0)}</span>
+                            <img 
+                              src={`https://logo.clearbit.com/${new URL(tool.url).hostname}`} 
+                              alt={tool.name}
+                              className="w-full h-full object-cover relative z-10 bg-[#13141b]"
+                              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                            />
+                          </div>
+                          <div className="min-w-0">
+                            <a href={tool.url} target="_blank" rel="noopener noreferrer" className="hover:text-purple-400 transition-colors">
+                              <h3 className="font-bold text-lg text-white leading-tight truncate">{tool.name}</h3>
+                            </a>
+                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                              tool.pricing === 'Freemium' ? 'bg-cyan-500/10 text-cyan-400' : 
+                              tool.pricing === 'Payant' ? 'bg-fuchsia-500/10 text-fuchsia-400' : 
+                              'bg-emerald-500/10 text-emerald-400'
+                            }`}>
+                              {getPricingLabel(tool.pricing)}
+                            </span>
+                          </div>
                         </div>
-                        <div>
-                          <a href={tool.url} target="_blank" rel="noopener noreferrer" className="hover:text-purple-400 transition-colors">
-  <h3 className="font-bold text-lg text-white leading-tight truncate">{tool.name}</h3>
-</a>
-<span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-  tool.pricing === 'Freemium' ? 'bg-cyan-500/10 text-cyan-400' : 
-  tool.pricing === 'Payant' ? 'bg-fuchsia-500/10 text-fuchsia-400' : 
-  'bg-emerald-500/10 text-emerald-400'
-}`}>
-  {getPricingLabel(tool.pricing)}
-</span>
+                        
+                        {/* 👇 LE BOUTON D'UPVOTE EST ICI 👇 */}
+                        <div className="shrink-0">
+                          <UpvoteButton toolId={tool.id} initialVotes={tool.upvotes || 0} />
                         </div>
                       </div>
-                    </div>
                     
                     <p className="text-sm text-slate-400 mb-2 line-clamp-2">
                       {locale === 'fr' 

@@ -8,6 +8,8 @@ import { supabase } from '../../../lib/supabase';
 import { useTranslations, useLocale } from 'next-intl';
 import AdBanner from '../../../components/AdBanner';
 import Footer from '@/components/Footer';
+import UpvoteButton from '@/components/UpvoteButton';
+
 const ITEMS_PER_PAGE = 12; // Nombre d'outils par page
 
 export default function AllToolsPage() {
@@ -164,8 +166,8 @@ export default function AllToolsPage() {
                 {filteredTools.map((tool) => (
                   <div key={tool.id} className="bg-[#13141b] border border-slate-800 rounded-2xl p-5 hover:border-purple-500/50 transition-all flex flex-col justify-between">
                     <div>
-                      <div className="flex justify-between items-start mb-3">
-                        <div className="flex gap-3 items-center">
+                      <div className="flex justify-between items-start mb-3 gap-2">
+                        <div className="flex gap-3 items-center min-w-0">
                           <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center border border-slate-700 relative overflow-hidden shrink-0">
                             <span className="font-bold text-lg text-purple-400 absolute">{tool.name.charAt(0)}</span>
                             <img 
@@ -175,10 +177,10 @@ export default function AllToolsPage() {
                               onError={(e) => { e.currentTarget.style.display = 'none'; }}
                             />
                           </div>
-                          <div>
+                          <div className="min-w-0">
                             <a href={tool.url} target="_blank" rel="noopener noreferrer" className="hover:text-purple-400 transition-colors">
-  <h3 className="font-bold text-lg text-white leading-tight truncate">{tool.name}</h3>
-</a>
+                              <h3 className="font-bold text-lg text-white leading-tight truncate">{tool.name}</h3>
+                            </a>
                             <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                               tool.pricing === 'Freemium' ? 'bg-cyan-500/10 text-cyan-400' : 
                               tool.pricing === 'Payant' ? 'bg-fuchsia-500/10 text-fuchsia-400' : 
@@ -187,6 +189,17 @@ export default function AllToolsPage() {
                               {getPricingLabel(tool.pricing)}
                             </span>
                           </div>
+                        </div>
+                        
+                        {/* 👇 LE BOUTON D'UPVOTE EST ICI 👇 */}
+                        <div className="shrink-0">
+                          <UpvoteButton toolId={tool.id} initialVotes={tool.upvotes || 0} />
+                        </div>
+                      </div>
+                        
+                        {/* 👇 LE BOUTON D'UPVOTE EST ICI 👇 */}
+                        <div className="shrink-0">
+                          <UpvoteButton toolId={tool.id} initialVotes={tool.upvotes || 0} />
                         </div>
                       </div>
                       
