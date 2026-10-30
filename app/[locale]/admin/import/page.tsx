@@ -1,32 +1,49 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // <-- useEffect ajouté
 import { supabase } from '@/lib/supabase';
-import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { ArrowLeft, Upload, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ImportToolsPage() {
-  const router = useRouter();
   const locale = useLocale();
   
   const [jsonInput, setJsonInput] = useState('');
   const [isImporting, setIsImporting] = useState(false);
   const [result, setResult] = useState<{ success: boolean; count: number; error?: string } | null>(null);
+  
+  // États pour la liste des outils existants
+  const [existingTools, setExistingTools] = useState<string[]>([]);
+  const [copied, setCopied] = useState(false);
+
+  // Récupération de la liste des outils au chargement
+  useEffect(() => {
+    const fetchExisting = async () => {
+      const { data } = await supabase.from('tools').select('name, url');
+      if (data) {
+        setExistingTools(data.map(t => `${t.name} (${t.url})`));
+      }
+    };
+    fetchExisting();
+  }, []);
+
+  const copyExistingList = () => {
+    navigator.clipboard.writeText(existingTools.join('\n'));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const handleImport = async () => {
     setIsImporting(true);
     setResult(null);
 
     try {
-      // 1. On vérifie que le JSON est valide
       const parsedData = JSON.parse(jsonInput);
       
       if (!Array.isArray(parsedData)) {
         throw new Error("Le JSON doit être un tableau d'objets (array).");
       }
 
-      // 2. On prépare les données pour Supabase
       const toolsToInsert = parsedData.map((tool: any) => ({
         name: tool.name || 'Sans nom',
         url: tool.url || '',
@@ -36,19 +53,19 @@ export default function ImportToolsPage() {
         description_en: tool.description_en || null,
         language: tool.language || 'both',
         pricing: tool.pricing || 'Freemium',
-        status: 'pending', // Par défaut, on met en attente pour que tu vérifies
+        status: 'pending',
         contributor: tool.contributor || null
       }));
 
-      // 3. On envoie à Supabase
+      // ✅ On utilise upsert pour ignorer les doublons (basé sur l'URL)
       const { error } = await supabase
         .from('tools')
-        .insert(toolsToInsert);
+        .upsert(toolsToInsert, { onConflict: 'url', ignoreDuplicates: true });
 
       if (error) throw error;
 
       setResult({ success: true, count: toolsToInsert.length });
-      setJsonInput(''); // On vide le champ
+      setJsonInput(''); 
       
     } catch (err: any) {
       setResult({ success: false, count: 0, error: err.message });
@@ -73,11 +90,21 @@ export default function ImportToolsPage() {
         </div>
 
         <div className="space-y-6">
-          {/* Zone de texte */}
+          
+          {/* Zone de texte et bouton de copie */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Données JSON (Tableau)
-            </label>
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-sm font-medium text-slate-300">
+                Données JSON (Tableau)
+              </label>
+              <button
+                onClick={copyExistingList}
+                className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1 rounded-lg border border-slate-700 transition-colors flex items-center gap-2"
+              >
+                {copied ? '✓ Copié !' : 'Copier la liste des outils existants'}
+              </button>
+            </div>
+            
             <textarea
               value={jsonInput}
               onChange={(e) => setJsonInput(e.target.value)}
@@ -107,7 +134,7 @@ export default function ImportToolsPage() {
                 <p className="font-bold">{result.success ? "Importation réussie !" : "Erreur d'importation"}</p>
                 <p className="text-sm mt-1">
                   {result.success 
-                    ? `${result.count} outils ont été ajoutés à la base de données en attente de validation.` 
+                    ? `${result.count} outils ont été traités (les doublons ont été ignorés).` 
                     : result.error}
                 </p>
               </div>
