@@ -9,28 +9,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'ID manquant' }, { status: 400 });
     }
 
-    // On récupère les votes actuels
-    const { data: tool, error: fetchError } = await supabase
-      .from('tools')
-      .select('upvotes')
-      .eq('id', toolId)
-      .single();
+    // On appelle la fonction SQL qui fait +1
+    const { error } = await supabase.rpc('increment_upvote', { tool_id: toolId });
 
-    if (fetchError || !tool) {
-      return NextResponse.json({ error: 'Outil introuvable' }, { status: 404 });
-    }
+    if (error) throw error;
 
-    // On ajoute +1
-    const newVotes = (tool.upvotes || 0) + 1;
-
-    const { error: updateError } = await supabase
-      .from('tools')
-      .update({ upvotes: newVotes })
-      .eq('id', toolId);
-
-    if (updateError) throw updateError;
-
-    return NextResponse.json({ success: true, upvotes: newVotes });
+    return NextResponse.json({ success: true });
   } catch (err) {
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
