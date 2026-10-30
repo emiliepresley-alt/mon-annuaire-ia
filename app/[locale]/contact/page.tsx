@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { Mail, ArrowLeft, X, Loader2, CheckCircle2 } from 'lucide-react';
+import { Turnstile } from '@marsidev/react-turnstile';
 import Footer from '@/components/Footer';
 
 export default function ContactPage() {
@@ -12,17 +13,33 @@ export default function ContactPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  
+  const [formData, setFormData] = useState({ 
+    name: '', 
+    email: '', 
+    message: '',
+    website: '' // Champ Honeypot (doit rester vide)
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!turnstileToken) {
+      alert("Veuillez patienter pendant la vérification anti-bot.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          turnstileToken
+        }),
       });
 
       if (res.ok) {
@@ -30,7 +47,8 @@ export default function ContactPage() {
         setTimeout(() => {
           setIsOpen(false);
           setIsSuccess(false);
-          setFormData({ name: '', email: '', message: '' });
+          setTurnstileToken(null);
+          setFormData({ name: '', email: '', message: '', website: '' });
         }, 3000);
       } else {
         alert("Erreur lors de l'envoi. Réessayez plus tard.");
@@ -96,6 +114,19 @@ export default function ContactPage() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  
+                  {/* 🛡️ CHAMP HONEYPOT (Invisible pour les humains) */}
+                  <div className="hidden" aria-hidden="true">
+                    <input 
+                      type="text" 
+                      name="website" 
+                      value={formData.website}
+                      onChange={(e) => setFormData({...formData, website: e.target.value})}
+                      tabIndex={-1} 
+                      autoComplete="off" 
+                    />
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-1.5">Votre nom</label>
                     <input 
@@ -126,10 +157,22 @@ export default function ContactPage() {
                       className="w-full bg-[#0b0c10] border border-slate-700 rounded-lg py-2.5 px-4 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors resize-none" 
                     />
                   </div>
+
+                  {/* 🛡️ WIDGET CLOUDFLARE TURNSTILE */}
+                  <div className="flex justify-center pt-2">
+                    <Turnstile 
+                      siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!} 
+                      onSuccess={(token) => setTurnstileToken(token)}
+                      onError={() => alert("Erreur lors du chargement du captcha.")}
+                      onExpire={() => setTurnstileToken(null)}
+                      options={{ theme: 'dark' }} // Pour que le captcha s'adapte au thème sombre
+                    />
+                  </div>
+
                   <button 
                     type="submit" 
-                    disabled={isSubmitting}
-                    className="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                    disabled={isSubmitting || !turnstileToken}
+                    className="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-2"
                   >
                     {isSubmitting ? <><Loader2 className="w-5 h-5 animate-spin" /> Envoi...</> : 'Envoyer le message'}
                   </button>
