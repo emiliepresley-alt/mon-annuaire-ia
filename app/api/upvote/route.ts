@@ -9,10 +9,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'ID manquant' }, { status: 400 });
     }
 
-    // On appelle la fonction SQL qui fait +1
-    const { error } = await supabase.rpc('increment_upvote', { tool_id: toolId });
+    // On s'assure que l'ID est bien un nombre (integer)
+    const numericId = parseInt(toolId, 10);
 
-    if (error) throw error;
+    if (isNaN(numericId)) {
+      return NextResponse.json({ error: 'ID invalide' }, { status: 400 });
+    }
+
+    // Appel de la fonction avec un nombre
+    const { error } = await supabase.rpc('increment_upvote', { tool_id: numericId });
+
+    if (error) {
+      console.error("Erreur Supabase RPC:", error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {
