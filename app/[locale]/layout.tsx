@@ -1,8 +1,9 @@
 import { Metadata, Viewport } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
+import Script from 'next/script'; // <-- Import indispensable
 import '../globals.css';
-import Script from 'next/script';
+
 export const viewport: Viewport = {
   themeColor: '#0b0c10',
 };
@@ -19,6 +20,9 @@ export async function generateMetadata({
     metadataBase: new URL(baseUrl),
     title: t('title'),
     description: t('subtitle'),
+    verification: {
+      google: 'google4d5043349511a8b1', // (Ton fichier de vérification reste dans public/, pas besoin de balise ici)
+    },
     openGraph: {
       title: t('title'),
       description: t('subtitle'),
@@ -56,21 +60,29 @@ export default async function RootLayout({
   return (
     <html lang={locale}>
       <body className="bg-[#0b0c10] text-white">
-	  <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-P6DZ2WT3"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-</script>
+        
+        {/* 👇 GOOGLE TAG MANAGER 👇 */}
+        <Script
+          id="gtm-script"
+          strategy="afterInteractive"
+          src="https://www.googletagmanager.com/gtm.js?id=GTM-P6DZ2WT3"
+        />
+        
+        <Script
+          id="gtm-inline"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+            `
+          }}
+        />
+
         <NextIntlClientProvider messages={messages}>
           {children}
         </NextIntlClientProvider>
-		
-		<script 
-  async 
-  src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0451071798143683"
-  crossOrigin="anonymous"
-></script>
       </body>
     </html>
   );
