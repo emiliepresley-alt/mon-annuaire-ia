@@ -19,7 +19,9 @@ export default function ImportToolsPage() {
   // Récupération de la liste des outils au chargement
   useEffect(() => {
     const fetchExisting = async () => {
-      const { data } = await supabase.from('tools').select('name, url');
+      const { data } = await supabase
+        .from('tools')
+        .select('name, url')
         .order('name', { ascending: true });	  
       if (data) {
         setExistingTools(data.map(t => `${t.name} (${t.url})`));
