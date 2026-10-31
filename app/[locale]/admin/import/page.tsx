@@ -20,6 +20,7 @@ export default function ImportToolsPage() {
   useEffect(() => {
     const fetchExisting = async () => {
       const { data } = await supabase.from('tools').select('name, url');
+        .order('name', { ascending: true });	  
       if (data) {
         setExistingTools(data.map(t => `${t.name} (${t.url})`));
       }
