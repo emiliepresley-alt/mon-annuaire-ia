@@ -2,7 +2,7 @@ import { Metadata, Viewport } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import '../globals.css';
-
+import Script from 'next/script';
 export const viewport: Viewport = {
   themeColor: '#0b0c10',
 };
@@ -56,6 +56,12 @@ export default async function RootLayout({
   return (
     <html lang={locale}>
       <body className="bg-[#0b0c10] text-white">
+	  <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-P6DZ2WT3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+</script>
         <NextIntlClientProvider messages={messages}>
           {children}
         </NextIntlClientProvider>
