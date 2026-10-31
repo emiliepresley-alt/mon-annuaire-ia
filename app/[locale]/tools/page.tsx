@@ -2,11 +2,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { 
-  Search, Filter, ExternalLink, BrainCircuit, ChevronLeft, ChevronRight, Loader2 
+  Search, Filter, ExternalLink, BrainCircuit, Loader2 
 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { useTranslations, useLocale } from 'next-intl';
 import UpvoteButton from '@/components/UpvoteButton';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Pagination from '@/components/Pagination';
+// import AdBanner from '@/components/AdBanner';
 
 const ITEMS_PER_PAGE = 12; 
 
@@ -16,16 +19,29 @@ export default function AllToolsPage() {
   const tTags = useTranslations('Tags');
   const locale = useLocale(); 
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // ✅ Gestion de la page via l'URL
+  const pageParam = searchParams.get('page');
+  const currentPage = pageParam ? parseInt(pageParam) : 1;
+
   const [tools, setTools] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [totalTools, setTotalTools] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
   
   // ✅ État pour le tri
   const [sortBy, setSortBy] = useState<'recent' | 'popular'>('recent'); 
 
   const [searchQuery, setSearchQuery] = useState("");
   const [priceFilters, setPriceFilters] = useState<string[]>([]);
+
+  // ✅ La fonction de changement de page
+  const handlePageChange = (newPage: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', newPage.toString());
+    router.push(`?${params.toString()}`, { scroll: false });  
+  };
 
   const getPricingLabel = (pricing: string) => {
     switch (pricing) {
@@ -65,7 +81,7 @@ export default function AllToolsPage() {
       setIsLoading(false);
     };
     fetchTools();
-  }, [locale, currentPage, sortBy]); // On recharge quand le tri change
+  }, [locale, currentPage, sortBy]);
 
   const filteredTools = useMemo(() => {
     return tools.filter(tool => {
@@ -125,10 +141,10 @@ export default function AllToolsPage() {
               {t('toolsFound', { count: totalTools })}
             </span>
             
-            {/* ✅ LES DEUX BOUTONS DE TRI SONT ICI */}
+            {/* LES DEUX BOUTONS DE TRI */}
             <div className="flex bg-[#13141b] border border-slate-700 rounded-lg p-1">
               <button
-                onClick={() => { setSortBy('recent'); setCurrentPage(1); }}
+                onClick={() => { setSortBy('recent'); handlePageChange(1); }}
                 className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
                   sortBy === 'recent' 
                     ? 'bg-slate-800 text-white shadow' 
@@ -138,7 +154,7 @@ export default function AllToolsPage() {
                 {t('mostRecent')}
               </button>
               <button
-                onClick={() => { setSortBy('popular'); setCurrentPage(1); }}
+                onClick={() => { setSortBy('popular'); handlePageChange(1); }}
                 className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
                   sortBy === 'popular' 
                     ? 'bg-slate-800 text-white shadow' 
@@ -186,6 +202,7 @@ export default function AllToolsPage() {
                 </div>
               </div>
             </div>
+			 {/* <AdBanner /> */}
           </div>
         </aside>
 
@@ -248,28 +265,12 @@ export default function AllToolsPage() {
                 ))}
               </div>
 
-              {/* PAGINATION */}
-              {totalPages > 1 && (
-                <div className="flex justify-center items-center mt-10 gap-4">
-                  <button 
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                    className="flex items-center gap-1 px-4 py-2 bg-[#13141b] border border-slate-700 rounded-lg text-sm text-slate-300 hover:text-white disabled:opacity-50 transition-colors"
-                  >
-                    <ChevronLeft className="w-4 h-4" /> Précédent
-                  </button>
-                  <span className="text-sm text-slate-400">
-                    Page <strong className="text-white">{currentPage}</strong> / {totalPages}
-                  </span>
-                  <button 
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                    className="flex items-center gap-1 px-4 py-2 bg-[#13141b] border border-slate-700 rounded-lg text-sm text-slate-300 hover:text-white disabled:opacity-50 transition-colors"
-                  >
-                    Suivant <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
+              {/* ✅ PAGINATION INTELLIGENTE */}
+              <Pagination 
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
             </>
           ) : (
             <div className="py-20 flex flex-col items-center justify-center text-center bg-[#13141b] border border-slate-800 rounded-2xl">

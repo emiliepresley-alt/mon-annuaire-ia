@@ -75,3 +75,19 @@ Annuaire d'outils d'intelligence artificielle bilingue (Français / Anglais). Le
 - Les fichiers de traduction (`fr.json`, `en.json`) doivent être parfaitement valides (attention aux virgules).
 - Ne jamais supprimer le fichier HTML de validation Google dans le dossier `public/`.
 - Ne pas toucher aux enregistrements DNS (Vercel, Resend, OVH) sans savoir ce qu'on fait.
+
+☑ Système d'Upvotes : Fonctionnel (API, SQL, composant React avec protection localStorage et tri "Plus populaires").
+
+- [ ] **Pagination intelligente sur le site public** : Ajouter les `...` et un champ pour sauter directement à une page spécifique sur les pages `/tools` et `/categorie/[slug]`.
+- [ ] **Persistance de la pagination** : Synchroniser la page actuelle avec l'URL (ex: `?page=5`) pour que le rafraîchissement ou le partage de lien conserve la position de l'utilisateur.
+
+ la pagination est terminée 
+
+
+
+
+
+
+
+
+

@@ -1,16 +1,18 @@
 'use client';
 import React, { useState, useEffect, useMemo } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { 
-  Search, Filter, ExternalLink, 
-  BrainCircuit, ChevronRight, Check, SlidersHorizontal, Loader2 
+  Search, Filter, BrainCircuit, ChevronRight, Check, SlidersHorizontal, Loader2 
 } from 'lucide-react';
 import { supabase } from '../../../../lib/supabase';
 import { useTranslations, useLocale } from 'next-intl';
-import AdBanner from '../../../../components/AdBanner';
+// import AdBanner from '@/components/AdBanner';
 import Footer from '@/components/Footer';
 import UpvoteButton from '@/components/UpvoteButton';
+import Pagination from '@/components/Pagination';
+
+const ITEMS_PER_PAGE = 12; // ✅ On ajoute la constante
 
 export default function CategoryPage() {
   const params = useParams();
@@ -19,33 +21,55 @@ export default function CategoryPage() {
   const t = useTranslations('CategoryPage');
   const tCat = useTranslations('Categories');
   const tFilters = useTranslations('Filters'); 
-  const tTags = useTranslations('Tags'); // <-- AJOUTE CETTE LIGNE
+  const tTags = useTranslations('Tags'); 
   const locale = useLocale(); 
   
   const categoryTitle = tCat(`${slug}.title`);
 
+  // ✅ Gestion de la page via l'URL
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pageParam = searchParams.get('page');
+  const currentPage = pageParam ? parseInt(pageParam) : 1;
+
   const [tools, setTools] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [totalTools, setTotalTools] = useState(0); // ✅ État pour le nombre total
   
-  const [priceFilters, setPriceFilters] = useState([]);
+  const [priceFilters, setPriceFilters] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // ✅ Fonction pour changer de page
+  const handlePageChange = (newPage: number) => {
+    const searchParamsObj = new URLSearchParams(searchParams.toString());
+    searchParamsObj.set('page', newPage.toString());
+    router.push(`?${searchParamsObj.toString()}`, { scroll: false });  
+  };
+
+  // ✅ Requête Supabase avec pagination
   useEffect(() => {
     const fetchTools = async () => {
       setIsLoading(true);
-      const { data } = await supabase
+      const from = (currentPage - 1) * ITEMS_PER_PAGE;
+      const to = from + ITEMS_PER_PAGE - 1;
+
+      const { data, count, error } = await supabase
         .from('tools')
-        .select('*')
+        .select('*', { count: 'exact' }) // On demande le total
         .eq('status', 'approved')
         .contains('categories', [slug])
         .in('language', [locale, 'both'])
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(from, to); // On limite les résultats
 
-      if (data) setTools(data);
+      if (data) {
+        setTools(data);
+        setTotalTools(count || 0);
+      }
       setIsLoading(false);
     };
     if (slug) fetchTools();
-  }, [slug, locale]);
+  }, [slug, locale, currentPage]); // On recharge si la page change
 
   const filteredTools = useMemo(() => {
     return tools.filter(tool => {
@@ -64,6 +88,7 @@ export default function CategoryPage() {
   const toggleFilter = (value: string) => {
     setPriceFilters(prev => prev.includes(value) ? prev.filter(item => item !== value) : [...prev, value]);
   };
+
   const getPricingLabel = (pricing: string) => {
     switch (pricing) {
       case 'Gratuit': return tFilters('prices.free');
@@ -73,6 +98,10 @@ export default function CategoryPage() {
       default: return pricing;
     }
   };
+
+  // ✅ Calcul du nombre de pages
+  const totalPages = Math.ceil(totalTools / ITEMS_PER_PAGE);
+
   return (
     <div className="min-h-screen bg-[#0b0c10] text-slate-200 font-sans">
       
@@ -111,7 +140,7 @@ export default function CategoryPage() {
             <p className="text-slate-400">{t('subtitle')}</p>
           </div>
           <span className="text-sm font-medium bg-slate-800 py-1 px-3 rounded-full text-slate-300">
-            {t('toolsFound', { count: filteredTools.length })}
+            {t('toolsFound', { count: totalTools })}
           </span>
         </div>
       </div>
@@ -121,11 +150,7 @@ export default function CategoryPage() {
         
         {/* SIDEBAR FILTRES */}
         <aside className="hidden lg:block lg:col-span-3 relative z-10 self-start">
-          
-          {/* 👇 Une seule div sticky qui englobe les filtres ET la pub 👇 */}
           <div className="sticky top-24 space-y-6">
-            
-            {/* Le bloc des filtres (sans le sticky ici) */}
             <div className="bg-[#13141b] border border-slate-800 rounded-2xl p-5">
               <div className="flex items-center gap-2 mb-6 text-cyan-400 border-b border-slate-800 pb-4">
                 <SlidersHorizontal className="w-5 h-5" />
@@ -152,10 +177,7 @@ export default function CategoryPage() {
                 </div>
               </div>
             </div>
-
-            {/* La bannière de pub (elle fait maintenant partie du bloc sticky) */}
-            <AdBanner />
-
+            {/* <AdBanner /> */}
           </div>
         </aside>
 
@@ -164,10 +186,11 @@ export default function CategoryPage() {
           {isLoading ? (
             <div className="flex justify-center py-20"><Loader2 className="w-10 h-10 text-purple-500 animate-spin" /></div>
           ) : filteredTools.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {filteredTools.map((tool) => (
-                <div key={tool.id} className="bg-[#13141b] border border-slate-800 rounded-2xl p-5 hover:border-purple-500/50 transition-all group flex flex-col justify-between">
-                  <div>
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {filteredTools.map((tool) => (
+                  <div key={tool.id} className="bg-[#13141b] border border-slate-800 rounded-2xl p-5 hover:border-purple-500/50 transition-all group flex flex-col justify-between">
+                    <div>
                       <div className="flex justify-between items-start mb-3 gap-2">
                         <div className="flex gap-3 items-center min-w-0">
                           <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center border border-slate-700 relative overflow-hidden shrink-0">
@@ -193,41 +216,46 @@ export default function CategoryPage() {
                           </div>
                         </div>
                         
-                        {/* 👇 LE BOUTON D'UPVOTE EST ICI 👇 */}
                         <div className="shrink-0">
                           <UpvoteButton toolId={tool.id} initialVotes={tool.upvotes || 0} />
                         </div>
                       </div>
                     
-                    <p className="text-sm text-slate-400 mb-2 line-clamp-2">
-                      {locale === 'fr' 
-                        ? (tool.description_fr || tool.description_en) 
-                        : (tool.description_en || tool.description_fr)}
-                    </p>
+                      <p className="text-sm text-slate-400 mb-2 line-clamp-2">
+                        {locale === 'fr' 
+                          ? (tool.description_fr || tool.description_en) 
+                          : (tool.description_en || tool.description_fr)}
+                      </p>
 
-                    {/* TAGS */}
-                    {tool.tags && tool.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-4">
-{tool.tags.map(tag => (
-  <Link 
-    key={tag} 
-    href={`/${locale}/tag/${tag}`}
-    className="text-[10px] bg-slate-800 text-cyan-400 px-2 py-0.5 rounded border border-slate-700 hover:bg-slate-700 hover:text-white transition-colors"
-  >
-    {tTags(tag)}
-  </Link>
-))}
-                      </div>
-                    )}
+                      {tool.tags && tool.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-4">
+                          {tool.tags.map((tag: string) => (
+                            <Link 
+                              key={tag} 
+                              href={`/${locale}/tag/${tag}`}
+                              className="text-[10px] bg-slate-800 text-cyan-400 px-2 py-0.5 rounded border border-slate-700 hover:bg-slate-700 hover:text-white transition-colors"
+                            >
+                              {tTags(tag)}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-800/50">
+                      <span className="text-xs text-slate-500">{t('submittedBy')} {tool.contributor || t('anonymous')}</span>
+                    </div>
                   </div>
-                  
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-800/50">
-                    <span className="text-xs text-slate-500">{t('submittedBy')} {tool.contributor || t('anonymous')}</span>
+                ))}
+              </div>
 
-                  </div>
-                </div>
-              ))}
-            </div>
+              {/* ✅ PAGINATION INTELLIGENTE */}
+              <Pagination 
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </>
           ) : (
             <div className="py-20 flex flex-col items-center justify-center text-center bg-[#13141b] border border-slate-800 rounded-2xl">
               <Filter className="w-12 h-12 text-slate-600 mb-4" />
@@ -240,7 +268,7 @@ export default function CategoryPage() {
           )}
         </div>
       </main>
-	  <Footer />
+      <Footer />
     </div>
   );
 }
