@@ -2,14 +2,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { 
-  Search, Filter, ExternalLink, BrainCircuit, Loader2 
-} from 'lucide-react';
+  Search, Filter, BrainCircuit, Loader2, X 
+} from 'lucide-react'; // ✅ X ajouté aux imports
 import { supabase } from '../../../lib/supabase';
 import { useTranslations, useLocale } from 'next-intl';
 import UpvoteButton from '@/components/UpvoteButton';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Pagination from '@/components/Pagination';
 // import AdBanner from '@/components/AdBanner';
+import ShareButton from '@/components/ShareButton';
 
 const ITEMS_PER_PAGE = 12; 
 
@@ -36,6 +37,9 @@ export default function AllToolsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [priceFilters, setPriceFilters] = useState<string[]>([]);
 
+  // ✅ État pour les filtres mobiles (BIEN PLACÉ À L'INTÉRIEUR DU COMPOSANT)
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+
   // ✅ La fonction de changement de page
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -59,7 +63,6 @@ export default function AllToolsPage() {
       const from = (currentPage - 1) * ITEMS_PER_PAGE;
       const to = from + ITEMS_PER_PAGE - 1;
 
-      // ✅ La requête Supabase prend en compte le tri
       let query = supabase
         .from('tools')
         .select('*', { count: 'exact' })
@@ -107,24 +110,34 @@ export default function AllToolsPage() {
   return (
     <div className="min-h-screen bg-[#0b0c10] text-slate-200 font-sans">
       
-      {/* HEADER */}
+      {/* HEADER PROPRE */}
       <header className="flex flex-col sm:flex-row items-center justify-between p-4 border-b border-slate-800 bg-[#0b0c10]/90 backdrop-blur-md sticky top-0 z-50 gap-4">
         <Link href={`/${locale}`} className="flex items-center gap-3 w-full sm:w-auto">
           <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-600 to-cyan-400 flex items-center justify-center">
             <BrainCircuit className="text-white w-6 h-6" />
           </div>
-          <h1 className="text-xl font-bold text-white">{tFilters('title')}</h1>
+          <h1 className="text-xl font-bold text-white">{t('title')}</h1> 
         </Link>
         
-        <div className="relative w-full sm:w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-          <input 
-            type="text" 
-            placeholder={t('searchPlaceholder')} 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#13141b] border border-slate-700 rounded-full py-2 pl-9 pr-4 text-sm focus:outline-none focus:border-cyan-500"
-          />
+        <div className="relative w-full sm:w-96 flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+            <input 
+              type="text" 
+              placeholder={t('searchPlaceholder')} 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[#13141b] border border-slate-700 rounded-full py-2 pl-9 pr-4 text-sm focus:outline-none focus:border-cyan-500"
+            />
+          </div>
+          
+          {/* 👇 C'EST CE BOUTON QUI MANQUE SUR TA CAPTURE 👇 */}
+          <button 
+            onClick={() => setIsMobileFiltersOpen(true)}
+            className="lg:hidden flex items-center justify-center p-2.5 bg-[#13141b] border border-slate-700 rounded-full text-slate-300 hover:text-white hover:border-slate-500 transition-colors shrink-0"
+          >
+            <Filter className="w-5 h-5" />
+          </button>
         </div>
       </header>
 
@@ -171,7 +184,7 @@ export default function AllToolsPage() {
       {/* CONTENU */}
       <main className="max-w-[1400px] mx-auto px-4 lg:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {/* FILTRES */}
+        {/* FILTRES DESKTOP */}
         <aside className="hidden lg:block lg:col-span-3 relative z-10">
           <div className="sticky top-24">
             <div className="bg-[#13141b] border border-slate-800 rounded-2xl p-5">
@@ -202,7 +215,6 @@ export default function AllToolsPage() {
                 </div>
               </div>
             </div>
-			 {/* <AdBanner /> */}
           </div>
         </aside>
 
@@ -241,8 +253,9 @@ export default function AllToolsPage() {
                           </div>
                         </div>
                         
-                        {/* BOUTON UPVOTE */}
-                        <div className="shrink-0">
+                        {/* BOUTONS PARTAGE & UPVOTE */}
+                        <div className="shrink-0 flex items-center gap-2">
+                          <ShareButton url={tool.url} title={tool.name} />
                           <UpvoteButton toolId={tool.id} initialVotes={tool.upvotes || 0} />
                         </div>
                       </div>
@@ -265,7 +278,7 @@ export default function AllToolsPage() {
                 ))}
               </div>
 
-              {/* ✅ PAGINATION INTELLIGENTE */}
+              {/* PAGINATION */}
               <Pagination 
                 currentPage={currentPage}
                 totalPages={totalPages}
@@ -280,6 +293,55 @@ export default function AllToolsPage() {
           )}
         </div>
       </main>
+
+      {/* 👇 MODALE FILTRES MOBILE 👇 */}
+      {isMobileFiltersOpen && (
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setIsMobileFiltersOpen(false)}></div>
+          
+          <div className="relative bg-[#13141b] border-t sm:border border-slate-700 w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2 text-cyan-400">
+                <Filter className="w-5 h-5" />
+                <h2 className="font-semibold text-lg">{tFilters('title')}</h2>
+              </div>
+              <button onClick={() => setIsMobileFiltersOpen(false)} className="text-slate-400 hover:text-white p-2 bg-slate-800 rounded-full">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="mb-6">
+              <h3 className="font-medium text-sm text-slate-200 mb-3">{tFilters('price')}</h3>
+              <div className="space-y-3">
+                {[
+                  { value: 'Gratuit', label: tFilters('prices.free') },
+                  { value: 'Freemium', label: tFilters('prices.freemium') },
+                  { value: 'Payant', label: tFilters('prices.paid') },
+                  { value: 'Open Source', label: tFilters('prices.openSource') }
+                ].map((item) => (
+                  <label key={item.value} className="flex items-center gap-3 cursor-pointer group">
+                    <input 
+                      type="checkbox" 
+                      checked={priceFilters.includes(item.value)}
+                      onChange={() => toggleFilter(item.value)}
+                      className="w-5 h-5 rounded border-slate-700 bg-slate-800 text-purple-500 focus:ring-purple-500/20" 
+                    />
+                    <span className="text-base text-slate-300 group-hover:text-white transition-colors">{item.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <button 
+              onClick={() => setIsMobileFiltersOpen(false)}
+              className="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-medium py-3 rounded-xl mt-4"
+            >
+              Voir les résultats
+            </button>
+          </div>
+        </div>
+      )}	  
+	  
     </div>
   );
 }
