@@ -101,7 +101,7 @@ export default function AnnuaireDesktop() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [priceFilters, setPriceFilters] = useState([]);
-  const [accessFilters, setAccessFilters] = useState([]);
+
 
   const switchLanguage = (newLocale: string) => {
     const newPath = pathname.replace(/^\/(fr|en)/, `/${newLocale}`);
@@ -157,7 +157,6 @@ export default function AnnuaireDesktop() {
   const resetFilters = () => {
     setSearchQuery("");
     setPriceFilters([]);
-    setAccessFilters([]);
   };
 
   const getPricingLabel = (pricing: string) => {
@@ -284,20 +283,7 @@ export default function AnnuaireDesktop() {
               </div>
             </div>
             
-            <div>
-              <div className="flex items-center justify-between cursor-pointer mb-3">
-                <h3 className="font-medium text-sm text-slate-200">{tFilters('access')}</h3>
-                <ChevronDown className="w-4 h-4 text-slate-400" />
-              </div>
-              <div className="space-y-2 opacity-50 pointer-events-none">
-                {['Web App', 'API', 'Extension Chrome', 'Desktop/Mobile'].map((item) => (
-                  <label key={item} className="flex items-center gap-3 cursor-pointer group">
-                    <input type="checkbox" className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-purple-500" />
-                    <span className="text-sm text-slate-300">{item}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
+
           </div>
           {/* <AdBanner /> */}
         </aside>
