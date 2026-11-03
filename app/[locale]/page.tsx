@@ -8,7 +8,7 @@ import {
   Database, Bot, ChevronRight, ChevronDown, ExternalLink, Loader2, X
 } from 'lucide-react';
 import SubmitToolModal from '../../components/SubmitToolModal';
-// import AdBanner from '@/components/AdBanner';
+import AdBanner from '@/components/AdBanner';
 import { supabase } from '../../lib/supabase';
 import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
@@ -285,7 +285,7 @@ export default function AnnuaireDesktop() {
             
 
           </div>
-          {/* <AdBanner /> */}
+          <AdBanner />
         </aside>
 
         <div className="col-span-1 lg:col-span-9">

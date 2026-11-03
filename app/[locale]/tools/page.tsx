@@ -9,7 +9,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import UpvoteButton from '@/components/UpvoteButton';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Pagination from '@/components/Pagination';
-// import AdBanner from '@/components/AdBanner';
+import AdBanner from '@/components/AdBanner';
 import ShareButton from '@/components/ShareButton';
 
 const ITEMS_PER_PAGE = 12; 
@@ -215,6 +215,7 @@ export default function AllToolsPage() {
                 </div>
               </div>
             </div>
+			<AdBanner />
           </div>
         </aside>
 

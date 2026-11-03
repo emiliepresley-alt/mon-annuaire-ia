@@ -7,7 +7,7 @@ import {
 } from 'lucide-react'; // ✅ X ajouté
 import { supabase } from '../../../../lib/supabase';
 import { useTranslations, useLocale } from 'next-intl';
-// import AdBanner from '@/components/AdBanner';
+import AdBanner from '@/components/AdBanner';
 import Footer from '@/components/Footer';
 import UpvoteButton from '@/components/UpvoteButton';
 import Pagination from '@/components/Pagination';
@@ -191,6 +191,7 @@ export default function CategoryPage() {
                 </div>
               </div>
             </div>
+			<AdBanner />
           </div>
         </aside>
 
