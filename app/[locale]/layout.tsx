@@ -23,6 +23,10 @@ export async function generateMetadata({
       template: `%s | AI Free Directory` // Permet d'avoir "Admin | AI Free Directory"
     },
     description: t('subtitle'),
+	   // 👇 AJOUTE CES LIGNES 👇
+    alternates: {
+      canonical: `${baseUrl}/${locale}`, // Pointe vers /fr ou /en sans query string
+    },
     openGraph: {
       title: t('title'),
       description: t('subtitle'),

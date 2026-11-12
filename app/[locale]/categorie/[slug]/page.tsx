@@ -12,7 +12,7 @@ import Footer from '@/components/Footer';
 import UpvoteButton from '@/components/UpvoteButton';
 import Pagination from '@/components/Pagination';
 import ShareButton from '@/components/ShareButton';
-
+import { notFound } from 'next/navigation';
 const ITEMS_PER_PAGE = 12;
 
 export default function CategoryPage() {
@@ -104,7 +104,10 @@ export default function CategoryPage() {
   };
 
   const totalPages = Math.ceil(totalTools / ITEMS_PER_PAGE);
-
+// Après le useEffect qui récupère les outils...
+if (!isLoading && tools.length === 0) {
+  notFound(); // <-- Importe notFound depuis 'next/navigation'
+}
   return (
     <div className="min-h-screen bg-[#0b0c10] text-slate-200 font-sans">
       
